@@ -1,17 +1,15 @@
-// 상품 container
-
 import 'package:flutter/material.dart';
 
 class ProductItem extends StatefulWidget {
-  final String name;
+  final String productName; // name → productName
   final int price;
-  final int? salePrice;
+  final int? discountPrice; // salePrice → discountPrice
   final bool isRow;
 
   const ProductItem({
-    required this.name,
+    required this.productName,
     required this.price,
-    this.salePrice,
+    this.discountPrice,
     this.isRow = false,
     super.key,
   });
@@ -28,7 +26,6 @@ class _ProductItemState extends State<ProductItem> {
   }
 
   void addToCart() {
-    // 실제 앱에서는 장바구니에 상품을 추가하는 로직 필요
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('장바구니에 추가되었습니다')));
@@ -59,7 +56,7 @@ class _ProductItemState extends State<ProductItem> {
       ],
     );
 
-    final priceText = widget.salePrice != null
+    final priceText = widget.discountPrice != null
         ? Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -67,7 +64,7 @@ class _ProductItemState extends State<ProductItem> {
                 '${widget.price}원',
                 style: const TextStyle(decoration: TextDecoration.lineThrough),
               ),
-              Text('${widget.salePrice}원'),
+              Text('${widget.discountPrice}원'),
             ],
           )
         : Text('${widget.price}원');
@@ -79,7 +76,7 @@ class _ProductItemState extends State<ProductItem> {
         const SizedBox(height: 8),
         ElevatedButton(onPressed: addToCart, child: const Text('담기')),
         const SizedBox(height: 4),
-        Text(widget.name),
+        Text(widget.productName), // 변경된 부분
         priceText,
       ],
     );
