@@ -1,30 +1,129 @@
 import 'package:flutter/material.dart';
+
 import 'package:thunder_shop/product_register/product_register_page.dart';
 
+import 'widgets/category_selector.dart';
+import 'widgets/product_item.dart';
+
 class ProductListPage extends StatefulWidget {
-  const ProductListPage({Key? key}) : super(key: key);
+  const ProductListPage({super.key});
 
   @override
   State<ProductListPage> createState() => _ProductListPageState();
 }
 
 class _ProductListPageState extends State<ProductListPage> {
+  String selectedCategory = '식품';
+  String selectedSubCategory = '전체';
+  bool isGridView = true;
+  int totalProducts = 36; // product_page 에서 받아와야함.
+
+  void goToRegisterPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const ProductRegisterPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('상품 목록')),
-      body: const Center(child: Text('상품 목록이 여기에 표시됩니다.')),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const ProductRegisterPage(),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Stack(
+          alignment: Alignment.center,
+          children: [
+            const Text('상품 목록'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: goToRegisterPage,
+                  child: const Text(
+                    '상품 등록',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+                const Icon(Icons.shopping_cart_outlined),
+              ],
             ),
-          );
-        },
-        child: const Icon(Icons.add),
-        tooltip: '상품 등록',
+          ],
+        ),
+      ),
+      body: Column(
+        children: [
+          CategorySelector(
+            selectedCategory: selectedCategory,
+            selectedSubCategory: selectedSubCategory,
+            onCategorySelected: (category) {
+              setState(() {
+                selectedCategory = category;
+                selectedSubCategory = '전체';
+              });
+            },
+            onSubCategorySelected: (subCategory) {
+              setState(() {
+                selectedSubCategory = subCategory;
+              });
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('총 $totalProducts개'),
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => setState(() => isGridView = false),
+                      icon: Icon(
+                        Icons.view_list,
+                        color: isGridView ? Colors.grey : Colors.black,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => setState(() => isGridView = true),
+                      icon: Icon(
+                        Icons.grid_view,
+                        color: isGridView ? Colors.black : Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: isGridView
+                ? GridView.count(
+                    padding: const EdgeInsets.all(12),
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 0.65,
+                    children: List.generate(
+                      totalProducts,
+                      (index) => ProductItem(
+                        name: '상품',
+                        price: 30000,
+                        salePrice: index == 0 ? 20000 : null,
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: totalProducts,
+                    itemBuilder: (context, index) => ProductItem(
+                      name: '상품', // product_page 에서 받아와야함.
+                      price: 30000, // product_page 에서 받아와야함.
+                      salePrice: index == 0
+                          ? 20000
+                          : null, // product_page 에서 받아와야함.
+                      isRow: true,
+                    ),
+                  ),
+          ),
+        ],
       ),
     );
   }
