@@ -17,35 +17,153 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
   final TextEditingController _discountPriceController =
       TextEditingController();
   final TextEditingController _shippingFeeController = TextEditingController();
+  final TextEditingController _shippingInfoController = TextEditingController();
 
   String? _selectedCategory;
   String? _selectedSubCategory;
-  String? _selectedDeliveryCompany;
   String? _mainImageUrl;
-  List<String> _imageUrls = [];
+  String? _descImageUrl;
   String? _videoUrl;
+  List<String> _imageUrls = [];
 
-  // 상품설명 이미지 리스트 (실제 파일 경로)
-  List<XFile> _descriptionImages = [];
+  bool _isPicking = false;
 
-  final List<String> _categories = ['식품', '패션', '뷰티', '생활'];
+  // 할인율 표시용 변수
+  double? _discountPercent;
+
+  final List<String> _categories = ['식품', '운동보조제', '운동용품', '헬스웨어', '서비스'];
   final Map<String, List<String>> _subCategories = {
-    '식품': ['닭가슴살', '견과류', '과일'],
-    '패션': ['상의', '하의', '신발'],
-    '뷰티': ['스킨케어', '메이크업'],
-    '생활': ['주방', '욕실'],
+    '식품': ['닭가슴살', '프로틴', '에너지드링크', '샐러드'],
+    '운동보조제': ['크레아틴', 'BCAA/아미노산', '프리워크아웃', '비타민'],
+    '운동용품': ['밴드/튜빙', '폼롤러/마사지볼', '요가매트'],
+    '헬스웨어': ['운동복', '스포츠브라/언더웨어', '운동화', '모자', '압박웨어/테이핑'],
+    '서비스': ['PT/운동 클래스'],
   };
-  final List<String> _deliveryCompanies = ['CJ대한통운', '한진택배', '로젠택배'];
 
   final ImagePicker _picker = ImagePicker();
 
-  // 상품설명 이미지 추가 함수
-  Future<void> _pickDescriptionImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
+  @override
+  void initState() {
+    super.initState();
+    // 실시간으로 할인율, 할인가 로직 체크
+    _priceController.addListener(_onPriceOrDiscountChanged);
+    _discountPriceController.addListener(_onPriceOrDiscountChanged);
+  }
+
+  void _onPriceOrDiscountChanged() {
+    final price = int.tryParse(_priceController.text) ?? 0;
+    final discount = int.tryParse(_discountPriceController.text) ?? 0;
+
+    // 할인율 계산
+    if (price > 0 && discount > 0 && discount < price) {
       setState(() {
-        _descriptionImages.add(image);
+        _discountPercent = 100 * (price - discount) / price;
       });
+    } else {
+      setState(() {
+        _discountPercent = null;
+      });
+    }
+
+    // 할인가 입력제한
+    if (_priceController.text.isEmpty) {
+      // 판매가가 없으면 할인가 입력 불가 및 초기화
+      if (_discountPriceController.text.isNotEmpty) {
+        _discountPriceController.clear();
+      }
+    } else if (discount >= price && _discountPriceController.text.isNotEmpty) {
+      // 할인가가 판매가보다 크거나 같으면 에러 & 초기화
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('할인된 가격을 입력해주세요.')));
+        _discountPriceController.clear();
+      });
+    }
+  }
+
+  Widget buildDeleteButton(VoidCallback onTap) {
+    return Container(
+      width: 28,
+      height: 28,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.8),
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.grey[400]!, width: 1),
+        boxShadow: [
+          BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1)),
+        ],
+      ),
+      child: Center(
+        child: Icon(Icons.close_rounded, color: Colors.grey[700], size: 18),
+      ),
+    );
+  }
+
+  Future<void> _pickMainImage() async {
+    if (_isPicking) return;
+    _isPicking = true;
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        setState(() {
+          _mainImageUrl = image.path;
+        });
+      }
+    } finally {
+      _isPicking = false;
+    }
+  }
+
+  Future<void> _pickDescImage() async {
+    if (_isPicking) return;
+    _isPicking = true;
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        setState(() {
+          _descImageUrl = image.path;
+        });
+      }
+    } finally {
+      _isPicking = false;
+    }
+  }
+
+  Future<void> _pickAdditionalImages() async {
+    if (_isPicking) return;
+    _isPicking = true;
+    try {
+      final List<XFile>? images = await _picker.pickMultiImage();
+      if (images != null && images.isNotEmpty) {
+        setState(() {
+          _imageUrls.addAll(images.map((xfile) => xfile.path));
+          if (_imageUrls.length > 9) {
+            _imageUrls = _imageUrls.sublist(0, 9);
+          }
+        });
+      }
+    } finally {
+      _isPicking = false;
+    }
+  }
+
+  Future<void> _pickVideo() async {
+    if (_isPicking) return;
+    _isPicking = true;
+    try {
+      final XFile? video = await _picker.pickVideo(source: ImageSource.gallery);
+      if (video != null) {
+        setState(() {
+          _videoUrl = video.path;
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('동영상 선택 중 오류가 발생했습니다: $e')));
+    } finally {
+      _isPicking = false;
     }
   }
 
@@ -57,22 +175,22 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
       ).showSnackBar(SnackBar(content: Text('대표 이미지를 등록해 주세요!')));
       return;
     }
+    if (_descImageUrl == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('상품설명 이미지를 등록해 주세요!')));
+      return;
+    }
     if (_selectedCategory == null || _selectedSubCategory == null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('카테고리를 선택해 주세요!')));
       return;
     }
-    if (_selectedDeliveryCompany == null) {
+    if (_shippingInfoController.text.trim().isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('택배사를 선택해 주세요!')));
-      return;
-    }
-    if (_descriptionImages.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('상품설명 이미지를 1장 이상 추가해 주세요!')));
+      ).showSnackBar(SnackBar(content: Text('배송 정보를 입력해 주세요!')));
       return;
     }
     int price = int.tryParse(_priceController.text) ?? 0;
@@ -83,32 +201,59 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
       ).showSnackBar(SnackBar(content: Text('할인가는 판매가보다 높을 수 없습니다!')));
       return;
     }
+    int shippingFee = int.tryParse(_shippingFeeController.text) ?? 0;
 
     final product = Product(
       id: UniqueKey().toString(),
       productName: _productNameController.text.trim(),
-      description: '[이미지 ${_descriptionImages.length}장]', // 예시!
-      category: '${_selectedCategory!} > ${_selectedSubCategory!}',
+      descImageUrl: _descImageUrl ?? '',
+      category: _selectedCategory!,
+      categoryDetail: _selectedSubCategory!,
       price: price,
       discountPrice: discountPrice,
-      imageUrl: _mainImageUrl!,
+      mainImageUrl: _mainImageUrl ?? '',
       imageUrls: _imageUrls,
-      seller: "현태", // TODO: 로그인된 유저 정보로 대체
+      videoUrl: _videoUrl,
+      shippingInfo: _shippingInfoController.text.trim(),
+      shippingFee: shippingFee,
     );
 
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         title: Text('상품 미리보기'),
-        content: Text(
-          '상품명: ${product.productName}\n가격: ${product.price}원\n카테고리: ${product.category}\n설명 이미지 수: ${_descriptionImages.length}',
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('상품명: ${product.productName}'),
+              Text('설명 이미지: ${product.descImageUrl}'),
+              Text('카테고리: ${product.category} / ${product.categoryDetail}'),
+              Text('가격: ${product.price}원 (할인: ${product.discountPrice}원)'),
+              Text('대표 이미지: ${product.mainImageUrl}'),
+              Text('추가 이미지: ${product.imageUrls.length}장'),
+              if (product.videoUrl != null) Text('동영상: ${product.videoUrl}'),
+              Text(
+                '배송정보: ${product.shippingInfo} (배송비: ${product.shippingFee}원)',
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   @override
+  void dispose() {
+    _priceController.removeListener(_onPriceOrDiscountChanged);
+    _discountPriceController.removeListener(_onPriceOrDiscountChanged);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final priceValue = int.tryParse(_priceController.text) ?? 0;
+
     return Scaffold(
       appBar: AppBar(title: Text('상품 등록')),
       body: Form(
@@ -116,36 +261,70 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            // 1. 대표 이미지 등록
             Text('대표 이미지*'),
-            ElevatedButton(
-              onPressed: () async {
-                setState(() {
-                  _mainImageUrl = 'https://via.placeholder.com/150';
-                });
-              },
-              child: Text(_mainImageUrl == null ? '이미지 선택' : '이미지 변경'),
-            ),
-            if (_mainImageUrl != null)
-              Image.network(_mainImageUrl!, width: 100, height: 100),
-            SizedBox(height: 16),
-            Text('추가 이미지 (0/9)'),
-            Wrap(
-              spacing: 8,
-              children: [
-                ..._imageUrls.map(
-                  (url) => Stack(
+            _mainImageUrl == null
+                ? ElevatedButton.icon(
+                    icon: Icon(Icons.add_photo_alternate),
+                    label: Text('이미지 선택'),
+                    onPressed: _pickMainImage,
+                  )
+                : Stack(
                     children: [
-                      Image.network(url, width: 60, height: 60),
+                      Image.file(
+                        File(_mainImageUrl!),
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                      ),
                       Positioned(
                         right: 0,
                         top: 0,
                         child: GestureDetector(
                           onTap: () {
                             setState(() {
-                              _imageUrls.remove(url);
+                              _mainImageUrl = null;
                             });
                           },
-                          child: Icon(Icons.close, color: Colors.red, size: 20),
+                          child: buildDeleteButton(() {
+                            setState(() {
+                              _mainImageUrl = null;
+                            });
+                          }),
+                        ),
+                      ),
+                    ],
+                  ),
+            SizedBox(height: 16),
+
+            // 2. 추가 이미지 등록(여러장)
+            Text('추가 이미지 (${_imageUrls.length}/9)'),
+            Wrap(
+              spacing: 8,
+              children: [
+                ..._imageUrls.map(
+                  (path) => Stack(
+                    children: [
+                      Image.file(
+                        File(path),
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                      ),
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _imageUrls.remove(path);
+                            });
+                          },
+                          child: buildDeleteButton(() {
+                            setState(() {
+                              _imageUrls.remove(path);
+                            });
+                          }),
                         ),
                       ),
                     ],
@@ -154,27 +333,61 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
                 if (_imageUrls.length < 9)
                   IconButton(
                     icon: Icon(Icons.add_box),
-                    onPressed: () {
-                      setState(() {
-                        _imageUrls.add('https://via.placeholder.com/60');
-                      });
-                    },
+                    onPressed: _pickAdditionalImages,
                   ),
               ],
             ),
             SizedBox(height: 16),
 
-            // 상품설명 이미지 업로드
+            // 3. 동영상 등록(선택)
+            Text('동영상(선택)'),
+            _videoUrl == null
+                ? ElevatedButton.icon(
+                    icon: Icon(Icons.video_library),
+                    label: Text('동영상 선택'),
+                    onPressed: _pickVideo,
+                  )
+                : Stack(
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 60,
+                        color: Colors.black12,
+                        child: Center(child: Icon(Icons.videocam, size: 40)),
+                      ),
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _videoUrl = null;
+                            });
+                          },
+                          child: buildDeleteButton(() {
+                            setState(() {
+                              _videoUrl = null;
+                            });
+                          }),
+                        ),
+                      ),
+                    ],
+                  ),
+            SizedBox(height: 16),
+
+            // 4. 상품설명 이미지 (한 장)
             Text('상품설명 이미지*'),
-            Wrap(
-              spacing: 8,
-              children: [
-                ..._descriptionImages.map(
-                  (file) => Stack(
+            _descImageUrl == null
+                ? ElevatedButton.icon(
+                    icon: Icon(Icons.add_photo_alternate),
+                    label: Text('설명 이미지 선택'),
+                    onPressed: _pickDescImage,
+                  )
+                : Stack(
                     children: [
                       Image.file(
-                        File(file.path),
-                        width: 80,
+                        File(_descImageUrl!),
+                        width: 120,
                         height: 80,
                         fit: BoxFit.cover,
                       ),
@@ -184,24 +397,21 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
                         child: GestureDetector(
                           onTap: () {
                             setState(() {
-                              _descriptionImages.remove(file);
+                              _descImageUrl = null;
                             });
                           },
-                          child: Icon(Icons.close, color: Colors.red, size: 20),
+                          child: buildDeleteButton(() {
+                            setState(() {
+                              _descImageUrl = null;
+                            });
+                          }),
                         ),
                       ),
                     ],
                   ),
-                ),
-                if (_descriptionImages.length < 10)
-                  IconButton(
-                    icon: Icon(Icons.add_photo_alternate),
-                    onPressed: _pickDescriptionImage,
-                  ),
-              ],
-            ),
             SizedBox(height: 16),
 
+            // 5. 카테고리/소분류
             DropdownButtonFormField<String>(
               value: _selectedCategory,
               items: _categories
@@ -236,6 +446,8 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
               validator: (v) => v == null ? '소분류를 선택해 주세요.' : null,
             ),
             SizedBox(height: 16),
+
+            // 6. 상품명
             TextFormField(
               controller: _productNameController,
               decoration: InputDecoration(
@@ -245,6 +457,8 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
               validator: (v) => v == null || v.isEmpty ? '상품명을 입력해 주세요.' : null,
             ),
             SizedBox(height: 16),
+
+            // 7. 가격/할인가
             Row(
               children: [
                 Expanded(
@@ -255,8 +469,6 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
                       border: OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.number,
-                    validator: (v) =>
-                        v == null || v.isEmpty ? '판매가를 입력해 주세요.' : null,
                   ),
                 ),
                 SizedBox(width: 12),
@@ -268,34 +480,37 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
                       border: OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.number,
+                    enabled: _priceController.text.isNotEmpty, // 판매가 입력 전엔 비활성화
                   ),
                 ),
               ],
             ),
-            Builder(
-              builder: (context) {
-                int price = int.tryParse(_priceController.text) ?? 0;
-                int discount = int.tryParse(_discountPriceController.text) ?? 0;
-                if (price > 0 && discount > 0 && discount < price) {
-                  double percent = (100 * (price - discount) / price);
-                  return Text('할인율: -${percent.toStringAsFixed(1)}%');
-                }
-                return SizedBox.shrink();
-              },
-            ),
+
+            // 할인율
+            if (_discountPercent != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  '-${_discountPercent!.toStringAsFixed(1)}%',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+
             SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: _selectedDeliveryCompany,
-              items: _deliveryCompanies
-                  .map((d) => DropdownMenuItem(value: d, child: Text(d)))
-                  .toList(),
-              onChanged: (val) {
-                setState(() {
-                  _selectedDeliveryCompany = val;
-                });
-              },
-              decoration: InputDecoration(labelText: '택배사*'),
-              validator: (v) => v == null ? '택배사를 선택해 주세요.' : null,
+
+            // 8. 배송 정보
+            TextFormField(
+              controller: _shippingInfoController,
+              decoration: InputDecoration(
+                labelText: '배송정보* (택배사명 등)',
+                border: OutlineInputBorder(),
+              ),
+              validator: (v) =>
+                  v == null || v.isEmpty ? '배송 정보를 입력해 주세요.' : null,
             ),
             SizedBox(height: 8),
             TextFormField(

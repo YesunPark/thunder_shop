@@ -45,5 +45,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+  	<string>사진 및 동영상 접근에 사용됩니다.</string>
+  	<key>NSPhotoLibraryAddUsageDescription</key>
+  	<string>사진/동영상을 저장하는데 필요합니다.</string>
 </dict>
 </plist>
