@@ -105,13 +105,20 @@ class _CartPageState extends State<CartPage> {
     ),
   ];
 
+  // 상품 전체 선택 여부
   bool get allSelected => cartItems.every((item) => item.selected);
+
+  // 상품 원가 총합 금액
   int get totalProductPrice => cartItems
       .where((item) => item.selected)
       .fold(0, (sum, item) => sum + item.product.discountPrice * item.quantity);
+
+  // 총 배송비 금액
   int get totalShippingFee => cartItems
       .where((item) => item.selected)
       .fold(0, (sum, item) => sum + item.product.shippingFee);
+
+  // 총 할인된 금액
   int get totalDiscount => cartItems
       .where((item) => item.selected)
       .fold(
@@ -120,10 +127,14 @@ class _CartPageState extends State<CartPage> {
             sum +
             (item.product.price - item.product.discountPrice) * item.quantity,
       );
+
+  // 총 결제 금액
+  int get totalPay => totalProductPrice + totalShippingFee;
+
+  // 선택된 상품 개수
   int get totalCount => cartItems
       .where((item) => item.selected)
       .fold(0, (sum, item) => sum + item.quantity);
-  int get totalPay => totalProductPrice + totalShippingFee;
 
   void toggleAll(bool? value) {
     setState(() {
