@@ -144,12 +144,14 @@ class _CartPageState extends State<CartPage> {
     });
   }
 
+  // 상품 선택 유무 핸들링 로직
   void toggleItem(int idx, bool? value) {
     setState(() {
       cartItems[idx].selected = value ?? false;
     });
   }
 
+  // 상품 수량 조절 로직
   void changeQuantity(int idx, int delta) {
     setState(() {
       int newQty = cartItems[idx].quantity + delta;
@@ -157,6 +159,7 @@ class _CartPageState extends State<CartPage> {
     });
   }
 
+  // 장바구니에서 상품 삭제 로직
   void removeItem(int idx) {
     setState(() {
       cartItems.removeAt(idx);
