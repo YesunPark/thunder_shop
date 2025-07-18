@@ -14,9 +14,9 @@ class ProductListPage extends StatefulWidget {
 
 class _ProductListPageState extends State<ProductListPage> {
   String selectedCategory = '식품';
-  String selectedSubCategory = '전체';
+  String selectedCategoryDetail = '전체'; // 변경됨
   bool isGridView = true;
-  int totalProducts = 36; // product_page 에서 받아와야함.
+  int totalProducts = 36; // 실제 상품 개수 받아오기
 
   void goToRegisterPage() {
     Navigator.push(
@@ -54,16 +54,16 @@ class _ProductListPageState extends State<ProductListPage> {
         children: [
           CategorySelector(
             selectedCategory: selectedCategory,
-            selectedSubCategory: selectedSubCategory,
+            selectedCategoryDetail: selectedCategoryDetail,
             onCategorySelected: (category) {
               setState(() {
                 selectedCategory = category;
-                selectedSubCategory = '전체';
+                selectedCategoryDetail = '전체';
               });
             },
-            onSubCategorySelected: (subCategory) {
+            onCategoryDetailSelected: (detail) {
               setState(() {
-                selectedSubCategory = subCategory;
+                selectedCategoryDetail = detail;
               });
             },
           ),
@@ -105,20 +105,18 @@ class _ProductListPageState extends State<ProductListPage> {
                     children: List.generate(
                       totalProducts,
                       (index) => ProductItem(
-                        name: '상품',
+                        productName: '상품',
                         price: 30000,
-                        salePrice: index == 0 ? 20000 : null,
+                        discountPrice: index == 0 ? 20000 : null,
                       ),
                     ),
                   )
                 : ListView.builder(
                     itemCount: totalProducts,
                     itemBuilder: (context, index) => ProductItem(
-                      name: '상품', // product_page 에서 받아와야함.
-                      price: 30000, // product_page 에서 받아와야함.
-                      salePrice: index == 0
-                          ? 20000
-                          : null, // product_page 에서 받아와야함.
+                      productName: '상품',
+                      price: 30000,
+                      discountPrice: index == 0 ? 20000 : null,
                       isRow: true,
                     ),
                   ),

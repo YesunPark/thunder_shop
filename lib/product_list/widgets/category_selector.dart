@@ -1,18 +1,16 @@
-// 카테고리 관리
-
 import 'package:flutter/material.dart';
 
 class CategorySelector extends StatelessWidget {
   final String selectedCategory;
-  final String selectedSubCategory;
+  final String selectedCategoryDetail; // 변수명 변경
   final Function(String) onCategorySelected;
-  final Function(String) onSubCategorySelected;
+  final Function(String) onCategoryDetailSelected; // 함수명 변경
 
   CategorySelector({
     required this.selectedCategory,
-    required this.selectedSubCategory,
+    required this.selectedCategoryDetail, // 변수명 변경
     required this.onCategorySelected,
-    required this.onSubCategorySelected,
+    required this.onCategoryDetailSelected, // 함수명 변경
     super.key,
   });
 
@@ -42,7 +40,7 @@ class CategorySelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subCategories = categoryMap[selectedCategory]!;
+    final categoryDetails = categoryMap[selectedCategory]!; // 변수명 변경
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,11 +55,11 @@ class CategorySelector extends StatelessWidget {
           }).toList(),
         ),
         Wrap(
-          children: subCategories.map((sub) {
+          children: categoryDetails.map((detail) {
             return buildCategoryBox(
-              sub,
-              sub == selectedSubCategory,
-              () => onSubCategorySelected(sub),
+              detail,
+              detail == selectedCategoryDetail,
+              () => onCategoryDetailSelected(detail),
             );
           }).toList(),
         ),
