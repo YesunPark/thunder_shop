@@ -9,101 +9,15 @@ class CartItem {
 }
 
 class CartPage extends StatefulWidget {
-  const CartPage({Key? key}) : super(key: key);
+  final List<CartItem> cartItems;
+  const CartPage({Key? key, required this.cartItems}) : super(key: key);
 
   @override
   State<CartPage> createState() => _CartPageState();
 }
 
 class _CartPageState extends State<CartPage> {
-  // 더미 데이터
-  List<CartItem> cartItems = [
-    CartItem(
-      product: Product(
-        id: '1',
-        productName: '상품1',
-        descImageUrl: '',
-        category: '카테고리',
-        categoryDetail: '소분류',
-        price: 20000,
-        discountPrice: 15000,
-        mainImageUrl: '',
-        imageUrls: [],
-        shippingInfo: '무료배송',
-        shippingFee: 0,
-      ),
-      quantity: 3,
-      selected: false,
-    ),
-    CartItem(
-      product: Product(
-        id: '2',
-        productName: '상품2',
-        descImageUrl: '',
-        category: '카테고리',
-        categoryDetail: '소분류',
-        price: 30000,
-        discountPrice: 25000,
-        mainImageUrl: '',
-        imageUrls: [],
-        shippingInfo: '배송비 3,000원',
-        shippingFee: 3000,
-      ),
-      quantity: 1,
-      selected: false,
-    ),
-    CartItem(
-      product: Product(
-        id: '3',
-        productName: '상품2',
-        descImageUrl: '',
-        category: '카테고리',
-        categoryDetail: '소분류',
-        price: 30000,
-        discountPrice: 25000,
-        mainImageUrl: '',
-        imageUrls: [],
-        shippingInfo: '배송비 3,000원',
-        shippingFee: 3000,
-      ),
-      quantity: 1,
-      selected: false,
-    ),
-    CartItem(
-      product: Product(
-        id: '4',
-        productName: '상품2',
-        descImageUrl: '',
-        category: '카테고리',
-        categoryDetail: '소분류',
-        price: 30000,
-        discountPrice: 25000,
-        mainImageUrl: '',
-        imageUrls: [],
-        shippingInfo: '배송비 3,000원',
-        shippingFee: 3000,
-      ),
-      quantity: 1,
-      selected: false,
-    ),
-    CartItem(
-      product: Product(
-        id: '5',
-        productName: '상품2',
-        descImageUrl: '',
-        category: '카테고리',
-        categoryDetail: '소분류',
-        price: 30000,
-        discountPrice: 25000,
-        mainImageUrl: '',
-        imageUrls: [],
-        shippingInfo: '배송비 3,000원',
-        shippingFee: 3000,
-      ),
-      quantity: 1,
-      selected: false,
-    ),
-  ];
+  List<CartItem> get cartItems => widget.cartItems;
 
   // 상품 전체 선택 여부
   bool get allSelected => cartItems.every((item) => item.selected);
