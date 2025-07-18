@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:thunder_shop/cart/cart_page.dart';
-import 'package:thunder_shop/product_list/product_list_page.dart';
+import 'cart/cart_page.dart';
+import 'product_list/product_list_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (_) => const ProductListPage(),
-        '/cart': (_) => const CartPage(),
+        '/cart': (_) => const CartPage(cartItems: []),
       },
     );
   }
