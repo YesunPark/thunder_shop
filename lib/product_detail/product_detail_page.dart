@@ -46,7 +46,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('홈페이지 제목'),
+        title: const Text('상품 상세'),
         centerTitle: true,
         leading: const BackButton(),
         actions: [
