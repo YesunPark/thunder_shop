@@ -4,7 +4,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:thunder_shop/model/product.dart';
 
 class ProductRegisterPage extends StatefulWidget {
-  const ProductRegisterPage({super.key});
+  // (변경) 마지막 id 값을 받는다!
+  final int lastId;
+  const ProductRegisterPage({super.key, required this.lastId});
 
   @override
   State<ProductRegisterPage> createState() => _ProductRegisterPageState();
@@ -25,10 +27,7 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
   String? _descImageUrl;
   String? _videoUrl;
   List<String> _imageUrls = [];
-
   bool _isPicking = false;
-
-  // 할인율 표시용 변수
   double? _discountPercent;
 
   final List<String> _categories = ['식품', '운동보조제', '운동용품', '헬스웨어', '서비스'];
@@ -45,7 +44,6 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
   @override
   void initState() {
     super.initState();
-    // 실시간으로 할인율, 할인가 로직 체크
     _priceController.addListener(_onPriceOrDiscountChanged);
     _discountPriceController.addListener(_onPriceOrDiscountChanged);
   }
@@ -53,8 +51,6 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
   void _onPriceOrDiscountChanged() {
     final price = int.tryParse(_priceController.text) ?? 0;
     final discount = int.tryParse(_discountPriceController.text) ?? 0;
-
-    // 할인율 계산
     if (price > 0 && discount > 0 && discount < price) {
       setState(() {
         _discountPercent = 100 * (price - discount) / price;
@@ -64,15 +60,11 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
         _discountPercent = null;
       });
     }
-
-    // 할인가 입력제한
     if (_priceController.text.isEmpty) {
-      // 판매가가 없으면 할인가 입력 불가 및 초기화
       if (_discountPriceController.text.isNotEmpty) {
         _discountPriceController.clear();
       }
     } else if (discount >= price && _discountPriceController.text.isNotEmpty) {
-      // 할인가가 판매가보다 크거나 같으면 에러 & 초기화
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ScaffoldMessenger.of(
           context,
@@ -203,8 +195,9 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
     }
     int shippingFee = int.tryParse(_shippingFeeController.text) ?? 0;
 
+    // (변경!) id는 lastId+1로 자동생성
     final product = Product(
-      id: UniqueKey().toString(),
+      id: (widget.lastId + 1).toString(),
       productName: _productNameController.text.trim(),
       descImageUrl: _descImageUrl ?? '',
       category: _selectedCategory!,
@@ -216,31 +209,11 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
       videoUrl: _videoUrl,
       shippingInfo: _shippingInfoController.text.trim(),
       shippingFee: shippingFee,
+      isLiked: false, // 좋아요 표기여부 추가
     );
 
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text('상품 미리보기'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('상품명: ${product.productName}'),
-              Text('설명 이미지: ${product.descImageUrl}'),
-              Text('카테고리: ${product.category} / ${product.categoryDetail}'),
-              Text('가격: ${product.price}원 (할인: ${product.discountPrice}원)'),
-              Text('대표 이미지: ${product.mainImageUrl}'),
-              Text('추가 이미지: ${product.imageUrls.length}장'),
-              if (product.videoUrl != null) Text('동영상: ${product.videoUrl}'),
-              Text(
-                '배송정보: ${product.shippingInfo} (배송비: ${product.shippingFee}원)',
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    // Navigator.pop으로 product 반환 (목록에 추가)
+    Navigator.pop(context, product);
   }
 
   @override
