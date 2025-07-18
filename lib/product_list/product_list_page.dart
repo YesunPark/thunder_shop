@@ -44,7 +44,12 @@ class _ProductListPageState extends State<ProductListPage> {
                     style: TextStyle(color: Colors.black),
                   ),
                 ),
-                const Icon(Icons.shopping_cart_outlined),
+                IconButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/cart');
+                  },
+                  icon: const Icon(Icons.shopping_cart_outlined),
+                ),
               ],
             ),
           ],
