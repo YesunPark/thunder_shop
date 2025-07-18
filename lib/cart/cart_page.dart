@@ -218,177 +218,267 @@ class _CartPageState extends State<CartPage> {
                 ],
               ),
             )
+          // 담긴 상품 목록
           : Column(
               children: [
                 Expanded(
                   child: ListView.builder(
-                    padding: EdgeInsets.symmetric(vertical: 8),
-                    itemCount: cartItems.length,
+                    padding: EdgeInsets.fromLTRB(0, 8, 0, 8),
+                    itemCount: cartItems.length + 1,
                     itemBuilder: (context, idx) {
-                      final item = cartItems[idx];
-                      return Card(
-                        margin: EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        color: Colors.white,
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Checkbox(
-                                value: item.selected,
-                                onChanged: (v) => toggleItem(idx, v),
-                              ),
-                              Container(
-                                width: 60,
-                                height: 60,
-                                color: Colors.grey[300],
-                                child: item.product.mainImageUrl.isNotEmpty
-                                    ? Image.network(
-                                        item.product.mainImageUrl,
-                                        fit: BoxFit.cover,
-                                      )
-                                    : Icon(
-                                        Icons.image,
-                                        size: 40,
-                                        color: Colors.grey[500],
+                      if (idx < cartItems.length) {
+                        final item = cartItems[idx];
+                        return Card(
+                          margin: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          color: Colors.white,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 5,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.zero,
+                                  child: Checkbox(
+                                    value: item.selected,
+                                    onChanged: (v) => toggleItem(idx, v),
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                ),
+
+                                // 상품 이미지
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(5),
+                                  child: Container(
+                                    width: 60,
+                                    height: 80,
+                                    color: Colors.grey[300],
+                                    child: item.product.mainImageUrl.isNotEmpty
+                                        ? Image.network(
+                                            item.product.mainImageUrl,
+                                            fit: BoxFit.cover,
+                                          )
+                                        : Icon(
+                                            Icons.image,
+                                            size: 40,
+                                            color: Colors.grey[500],
+                                          ),
+                                  ),
+                                ),
+                                SizedBox(width: 12),
+
+                                // 상품 이름
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        item.product.productName,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                              ),
-                              SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            item.product.productName,
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
+                                      SizedBox(height: 8),
+
+                                      // 상품 수량 조절란
+                                      Row(
+                                        children: [
+                                          Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              IconButton(
+                                                icon: Icon(Icons.remove),
+                                                onPressed: () =>
+                                                    changeQuantity(idx, -1),
+                                                iconSize: 20,
+                                                padding: EdgeInsets.zero,
+                                                constraints:
+                                                    BoxConstraints.tightFor(
+                                                      width: 20,
+                                                      height: 20,
+                                                    ),
+                                                visualDensity:
+                                                    VisualDensity.compact,
+                                                alignment: Alignment.center,
+                                              ),
+                                              Container(
+                                                width: 20,
+                                                height: 18,
+                                                alignment: Alignment.center,
+                                                child: Text(
+                                                  '${item.quantity}',
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ),
+                                              IconButton(
+                                                icon: Icon(Icons.add),
+                                                onPressed: () =>
+                                                    changeQuantity(idx, 1),
+                                                iconSize: 20,
+                                                padding: EdgeInsets.zero,
+                                                constraints:
+                                                    BoxConstraints.tightFor(
+                                                      width: 20,
+                                                      height: 20,
+                                                    ),
+                                                visualDensity:
+                                                    VisualDensity.compact,
+                                                alignment: Alignment.center,
+                                              ),
+                                            ],
+                                          ),
+
+                                          // 상품 별 가격 기재란
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.end,
+                                              children: [
+                                                // 원가
+                                                Text(
+                                                  '${item.product.price}원',
+                                                  textAlign: TextAlign.right,
+                                                  style: TextStyle(
+                                                    fontSize: 10,
+                                                    color: Colors.grey,
+                                                    decoration: TextDecoration
+                                                        .lineThrough,
+                                                  ),
+                                                ),
+                                                SizedBox(height: 3),
+                                                // 할인가
+                                                Text(
+                                                  '${item.product.discountPrice}원',
+                                                  textAlign: TextAlign.right,
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                                SizedBox(height: 3),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.end,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
+                                                  children: [
+                                                    Text(
+                                                      '배송비',
+                                                      textAlign:
+                                                          TextAlign.right,
+                                                      style: TextStyle(
+                                                        fontSize: 10,
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 10),
+                                                    Text(
+                                                      '${item.product.shippingFee}원',
+                                                      textAlign:
+                                                          TextAlign.right,
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                        ),
-                                        IconButton(
-                                          icon: Icon(Icons.close),
-                                          onPressed: () => removeItem(idx),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        TextButton(
-                                          onPressed: null,
-                                          child: Text(
-                                            '상품 확인하기',
-                                            style: TextStyle(fontSize: 12),
-                                          ),
-                                        ),
-                                        Spacer(),
-                                        Text(
-                                          '${item.product.discountPrice}원',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        IconButton(
-                                          icon: Icon(Icons.remove),
-                                          onPressed: () =>
-                                              changeQuantity(idx, -1),
-                                          constraints: BoxConstraints(),
-                                          padding: EdgeInsets.zero,
-                                        ),
-                                        Container(
-                                          width: 32,
-                                          alignment: Alignment.center,
-                                          child: Text(
-                                            '${item.quantity}',
-                                            style: TextStyle(fontSize: 16),
-                                          ),
-                                        ),
-                                        IconButton(
-                                          icon: Icon(Icons.add),
-                                          onPressed: () =>
-                                              changeQuantity(idx, 1),
-                                          constraints: BoxConstraints(),
-                                          padding: EdgeInsets.zero,
-                                        ),
-                                        SizedBox(width: 16),
-                                        Text(
-                                          '배송비 ',
-                                          style: TextStyle(fontSize: 12),
-                                        ),
-                                        Text(
-                                          '${item.product.shippingFee}원',
-                                          style: TextStyle(fontSize: 12),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
+                                IconButton(
+                                  icon: Icon(Icons.close),
+                                  onPressed: () => removeItem(idx),
+                                  padding: EdgeInsets.zero,
+                                  visualDensity: VisualDensity.compact,
+                                  alignment: Alignment.topCenter,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      } else {
+                        // 마지막에 총 금액 정보 표시
+                        return Container(
+                          color: Colors.white,
+                          margin: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('총 상품 금액'),
+                                  Text('${totalProductPrice} 원'),
+                                ],
+                              ),
+                              SizedBox(height: 4),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('총 배송비'),
+                                  Text('+${totalShippingFee} 원'),
+                                ],
+                              ),
+                              SizedBox(height: 4),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('총 할인 금액'),
+                                  Text('-${totalDiscount} 원'),
+                                ],
+                              ),
+                              SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    '결제 금액',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${totalPay} 원',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ),
-                      );
+                        );
+                      }
                     },
-                  ),
-                ),
-                Container(
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('총 상품 금액'),
-                            Text('${totalProductPrice} 원'),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('총 배송비'),
-                            Text('+${totalShippingFee} 원'),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('총 할인 금액'),
-                            Text('-${totalDiscount} 원'),
-                          ],
-                        ),
-                        SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '결제 금액',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              '${totalPay} 원',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
                   ),
                 ),
               ],
