@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:thunder_shop/product_detail/product_detail_page.dart'; // 상세 페이지 import
 
 class ProductItem extends StatefulWidget {
-  final String productName; // name → productName
+  final String productName;
   final int price;
-  final int? discountPrice; // salePrice → discountPrice
+  final int? discountPrice;
   final bool isRow;
 
   const ProductItem({
@@ -29,6 +30,13 @@ class _ProductItemState extends State<ProductItem> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('장바구니에 추가되었습니다')));
+  }
+
+  void goToDetailPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const ProductDetailPage()),
+    );
   }
 
   @override
@@ -64,21 +72,28 @@ class _ProductItemState extends State<ProductItem> {
                 '${widget.price}원',
                 style: const TextStyle(decoration: TextDecoration.lineThrough),
               ),
-              Text('${widget.discountPrice}원'),
+              Text(
+                '${widget.discountPrice}원',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
             ],
           )
         : Text('${widget.price}원');
 
-    final content = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        imageBox,
-        const SizedBox(height: 8),
-        ElevatedButton(onPressed: addToCart, child: const Text('담기')),
-        const SizedBox(height: 4),
-        Text(widget.productName), // 변경된 부분
-        priceText,
-      ],
+    // 상세 페이지로 이동할 영역을 GestureDetector로 감쌈
+    final tappableContent = GestureDetector(
+      onTap: goToDetailPage,
+      behavior: HitTestBehavior.translucent,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          imageBox,
+          const SizedBox(height: 8),
+          Text(widget.productName),
+          const SizedBox(height: 4),
+          priceText,
+        ],
+      ),
     );
 
     return Container(
@@ -88,7 +103,22 @@ class _ProductItemState extends State<ProductItem> {
         borderRadius: BorderRadius.circular(12),
         color: Colors.white,
       ),
-      child: widget.isRow ? Row(children: [Expanded(child: content)]) : content,
+      child: widget.isRow
+          ? Row(
+              children: [
+                Expanded(child: tappableContent),
+                const SizedBox(width: 8),
+                ElevatedButton(onPressed: addToCart, child: const Text('담기')),
+              ],
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                tappableContent,
+                const SizedBox(height: 8),
+                ElevatedButton(onPressed: addToCart, child: const Text('담기')),
+              ],
+            ),
     );
   }
 }
