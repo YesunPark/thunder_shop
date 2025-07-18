@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import '../model/product.dart';
 import 'widgets/product_image_slider.dart';
 import 'widgets/product_price_info.dart';
 import 'widgets/purchase_bottom_sheet.dart';
 
 class ProductDetailPage extends StatefulWidget {
-  final bool showBottomBar;
+  final Product product;
 
-  const ProductDetailPage({super.key, this.showBottomBar = false});
+  const ProductDetailPage({super.key, required this.product});
 
   @override
   State<ProductDetailPage> createState() => _ProductDetailPageState();
@@ -15,16 +16,11 @@ class ProductDetailPage extends StatefulWidget {
 class _ProductDetailPageState extends State<ProductDetailPage> {
   int _currentIndex = 0;
 
-  final List<String> imageList = [
-    'https://picsum.photos/seed/1/300/250',
-    'https://picsum.photos/seed/2/300/250',
-    'https://picsum.photos/seed/3/300/250',
-    'https://picsum.photos/seed/4/300/250',
-  ];
-
-  final String productName = '부드러운 닭가슴살 12팩';
-  final int originalPrice = 58000;
-  final int salePrice = 25000;
+  List<String> get imageList {
+    return widget.product.imageUrls.isNotEmpty
+        ? widget.product.imageUrls
+        : ['https://picsum.photos/seed/${widget.product.id}/300/250'];
+  }
 
   void showPurchaseSheet(BuildContext context) {
     showModalBottomSheet(
@@ -34,9 +30,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) => PurchaseBottomSheet(
-        productName: productName,
-        originalPrice: originalPrice,
-        salePrice: salePrice,
+        productName: widget.product.productName,
+        originalPrice: widget.product.price,
+        salePrice: widget.product.discountPrice,
         imageUrl: imageList[0],
       ),
     );
@@ -44,6 +40,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final product = widget.product;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('상품 상세'),
@@ -70,17 +68,18 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           ),
           const SizedBox(height: 16),
 
-          // 상품 제목 및 가격
           Text(
-            productName,
+            product.productName,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
 
-          ProductPriceInfo(originalPrice: originalPrice, salePrice: salePrice),
+          ProductPriceInfo(
+            originalPrice: product.price,
+            salePrice: product.discountPrice,
+          ),
           const SizedBox(height: 24),
 
-          // 배송 정보
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -93,9 +92,13 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 ],
               ),
               const SizedBox(width: 40),
-              const Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [Text('번개 택배'), SizedBox(height: 8), Text('3,000원')],
+                children: [
+                  Text(product.shippingInfo),
+                  const SizedBox(height: 8),
+                  Text('${product.shippingFee}원'),
+                ],
               ),
             ],
           ),

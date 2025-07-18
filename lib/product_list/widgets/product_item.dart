@@ -38,11 +38,13 @@ class _ProductItemState extends State<ProductItem> {
     }
   }
 
-  // 상세페이지 이동 로직
+  //  상세페이지 이동 시 product 넘기기
   void _goToDetailPage(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const ProductDetailPage()),
+      MaterialPageRoute(
+        builder: (_) => ProductDetailPage(product: widget.product),
+      ),
     );
   }
 
@@ -87,7 +89,7 @@ class _ProductItemState extends State<ProductItem> {
           )
         : Text('${widget.product.price}원');
 
-    // 상세 페이지로 이동할 영역을 GestureDetector로 감쌈
+    // _goToDetailPage(context)로 상세페이지 이동 연결
     final tappableContent = GestureDetector(
       onTap: () => _goToDetailPage(context),
       behavior: HitTestBehavior.translucent,
