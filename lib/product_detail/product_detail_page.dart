@@ -18,6 +18,7 @@ class ProductDetailPage extends StatefulWidget {
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
   int _currentIndex = 0;
+  int _reviewCount = 0; // ✅ 리뷰 개수 상태
   bool _showInquiryForm = false;
 
   List<String> get imageList {
@@ -46,6 +47,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         imageUrl: imageList[0],
       ),
     );
+  }
+
+  void _updateReviewCount(int count) {
+    setState(() {
+      _reviewCount = count;
+    });
   }
 
   @override
@@ -132,11 +139,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 '상품 후기',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Text('총 ${product.reviewList.length}개'),
+              Text('총 $_reviewCount개'),
             ],
           ),
           const SizedBox(height: 12),
-          ProductReviewSection(reviews: product.reviewList),
+          ProductReviewSection(
+            reviews: product.reviewList,
+            onReviewCountChanged: _updateReviewCount, // ✅ 개수 반영 콜백
+          ),
 
           const SizedBox(height: 24),
 
