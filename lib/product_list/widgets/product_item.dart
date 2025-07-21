@@ -50,12 +50,10 @@ class _ProductItemState extends State<ProductItem> {
     });
   }
 
-  // 👇 3자리 콤마 함수
   String formatPrice(int price) {
     return NumberFormat('#,###').format(price);
   }
 
-  // 👇 할인율 계산 (정수, 0~100)
   int? calcDiscountPercent(int price, int discountPrice) {
     if (price > 0 && discountPrice > 0 && discountPrice < price) {
       return ((100 * (price - discountPrice) / price).round());
@@ -71,7 +69,7 @@ class _ProductItemState extends State<ProductItem> {
     final discountPercent = isDiscount
         ? calcDiscountPercent(
             widget.product.price,
-            widget.product.discountPrice,
+            widget.product.discountPrice!,
           )
         : null;
 
@@ -108,7 +106,7 @@ class _ProductItemState extends State<ProductItem> {
                         ),
                       ),
                     Text(
-                      '${formatPrice(widget.product.discountPrice)}원',
+                      '${formatPrice(widget.product.discountPrice!)}원',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
@@ -124,122 +122,125 @@ class _ProductItemState extends State<ProductItem> {
           }
         }
 
-        return Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(14),
-            color: Colors.white,
-          ),
-          child: isCard
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Stack(
-                      children: [
-                        Container(
-                          height: 120,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(8),
+        return GestureDetector(
+          onTap: () => _goToDetailPage(context),
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(14),
+              color: Colors.white,
+            ),
+            child: isCard
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Stack(
+                        children: [
+                          Container(
+                            height: 120,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            alignment: Alignment.center,
+                            child: const Text('이미지'),
                           ),
-                          alignment: Alignment.center,
-                          child: const Text('이미지'),
-                        ),
-                        Positioned(
-                          top: 0,
-                          right: 0,
-                          child: IconButton(
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                            onPressed: toggleFavorite,
-                            icon: Icon(
-                              widget.product.isLiked
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: widget.product.isLiked
-                                  ? Colors.red
-                                  : Colors.grey,
+                          Positioned(
+                            top: 0,
+                            right: 0,
+                            child: IconButton(
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              onPressed: toggleFavorite,
+                              icon: Icon(
+                                widget.product.isLiked
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: widget.product.isLiked
+                                    ? Colors.red
+                                    : Colors.grey,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      widget.product.productName,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    priceWidget(),
-                    const Spacer(),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => _addToCart(context),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const Text('담기'),
-                      ),
-                    ),
-                  ],
-                )
-              : Row(
-                  children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      alignment: Alignment.center,
-                      child: const Text('이미지'),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.product.productName,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4),
-                          priceWidget(),
                         ],
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    SizedBox(
-                      height: 40,
-                      child: ElevatedButton(
-                        onPressed: () => _addToCart(context),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                      const SizedBox(height: 12),
+                      Text(
+                        widget.product.productName,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
                         ),
-                        child: const Text('담기'),
                       ),
-                    ),
-                  ],
-                ),
+                      const SizedBox(height: 4),
+                      priceWidget(),
+                      const Spacer(),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () => _addToCart(context),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text('담기'),
+                        ),
+                      ),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text('이미지'),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.product.productName,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            priceWidget(),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      SizedBox(
+                        height: 40,
+                        child: ElevatedButton(
+                          onPressed: () => _addToCart(context),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text('담기'),
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
         );
       },
     );
