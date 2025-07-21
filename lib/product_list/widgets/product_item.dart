@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:thunder_shop/product_detail/product_detail_page.dart';
+import 'package:thunder_shop/model/product.dart';
+import 'package:thunder_shop/model/favorite_button.dart';
 
 class ProductItem extends StatefulWidget {
-  final String productName; // name → productName
-  final int price;
-  final int? discountPrice; // salePrice → discountPrice
+  final Product product;
+  final VoidCallback? onTap;
+  final void Function(Product)? onAddToCart;
   final bool isRow;
 
   const ProductItem({
-    required this.productName,
-    required this.price,
-    this.discountPrice,
+    required this.product,
+    this.onTap,
+    this.onAddToCart,
     this.isRow = false,
     super.key,
   });
@@ -19,16 +22,31 @@ class ProductItem extends StatefulWidget {
 }
 
 class _ProductItemState extends State<ProductItem> {
-  bool isFavorite = false;
-
   void toggleFavorite() {
-    setState(() => isFavorite = !isFavorite);
+    setState(() {
+      widget.product.isLiked = !widget.product.isLiked;
+    });
   }
 
-  void addToCart() {
-    ScaffoldMessenger.of(
+  void _addToCart(BuildContext context) {
+    if (widget.onAddToCart != null) {
+      widget.onAddToCart!(widget.product);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('장바구니에 추가되었습니다')));
+    }
+  }
+
+  void _goToDetailPage(BuildContext context) {
+    Navigator.push(
       context,
-    ).showSnackBar(const SnackBar(content: Text('장바구니에 추가되었습니다')));
+      MaterialPageRoute(
+        builder: (_) => ProductDetailPage(product: widget.product),
+      ),
+    ).then((_) {
+      // 상세페이지에서 돌아올 때 상태 갱신
+      setState(() {});
+    });
   }
 
   @override
@@ -44,41 +62,46 @@ class _ProductItemState extends State<ProductItem> {
         Positioned(
           top: 6,
           right: 6,
-          child: IconButton(
-            onPressed: toggleFavorite,
-            icon: Icon(
-              isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: isFavorite ? Colors.red : Colors.grey,
-              size: 24,
-            ),
+          child: FavoriteButton(
+            isFavorite: widget.product.isLiked,
+            onToggle: toggleFavorite,
+            size: 24,
+            activeColor: Colors.red,
+            inactiveColor: Colors.grey,
           ),
         ),
       ],
     );
 
-    final priceText = widget.discountPrice != null
+    final priceText = widget.product.discountPrice != null
         ? Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${widget.price}원',
+                '${widget.product.price}원',
                 style: const TextStyle(decoration: TextDecoration.lineThrough),
               ),
-              Text('${widget.discountPrice}원'),
+              Text(
+                '${widget.product.discountPrice}원',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
             ],
           )
-        : Text('${widget.price}원');
+        : Text('${widget.product.price}원');
 
-    final content = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        imageBox,
-        const SizedBox(height: 8),
-        ElevatedButton(onPressed: addToCart, child: const Text('담기')),
-        const SizedBox(height: 4),
-        Text(widget.productName), // 변경된 부분
-        priceText,
-      ],
+    final tappableContent = GestureDetector(
+      onTap: () => _goToDetailPage(context),
+      behavior: HitTestBehavior.translucent,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          imageBox,
+          const SizedBox(height: 8),
+          Text(widget.product.productName),
+          const SizedBox(height: 4),
+          priceText,
+        ],
+      ),
     );
 
     return Container(
@@ -88,7 +111,28 @@ class _ProductItemState extends State<ProductItem> {
         borderRadius: BorderRadius.circular(12),
         color: Colors.white,
       ),
-      child: widget.isRow ? Row(children: [Expanded(child: content)]) : content,
+      child: widget.isRow
+          ? Row(
+              children: [
+                Expanded(child: tappableContent),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () => _addToCart(context),
+                  child: const Text('담기'),
+                ),
+              ],
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                tappableContent,
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: () => _addToCart(context),
+                  child: const Text('담기'),
+                ),
+              ],
+            ),
     );
   }
 }

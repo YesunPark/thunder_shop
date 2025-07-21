@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:thunder_shop/model/product.dart';
+import 'package:thunder_shop/model/cart_item.dart';
+
 import 'package:thunder_shop/product_register/product_register_page.dart';
+import '../cart/cart_page.dart';
 
 import 'widgets/category_selector.dart';
 import 'widgets/product_item.dart';
@@ -539,6 +542,21 @@ class _ProductListPageState extends State<ProductListPage> {
   String selectedCategoryDetail = '전체';
   bool isGridView = true;
 
+  // 장바구니 상태
+  List<CartItem> cartItems = [];
+
+  // 장바구니에 상품 추가 로직
+  void _addToCart(Product product) {
+    setState(() {
+      final idx = cartItems.indexWhere((item) => item.product.id == product.id);
+      if (idx >= 0) {
+        cartItems[idx].quantity++;
+      } else {
+        cartItems.add(CartItem(product: product));
+      }
+    });
+  }
+
   Future<void> goToRegisterPage() async {
     // (변경!) 마지막 id 넘겨서 새 상품에 id+1 부여
     int lastId = allProducts.isNotEmpty ? int.parse(allProducts.last.id) : 0;
@@ -550,6 +568,14 @@ class _ProductListPageState extends State<ProductListPage> {
     if (newProduct != null) {
       setState(() => allProducts.add(newProduct));
     }
+  }
+
+  // 장바구니 화면으로 이동 로직
+  void goToCartPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => CartPage(cartItems: cartItems)),
+    );
   }
 
   @override
@@ -579,7 +605,10 @@ class _ProductListPageState extends State<ProductListPage> {
                     style: TextStyle(color: Colors.black),
                   ),
                 ),
-                const Icon(Icons.shopping_cart_outlined),
+                IconButton(
+                  onPressed: goToCartPage,
+                  icon: const Icon(Icons.shopping_cart_outlined),
+                ),
               ],
             ),
           ],
@@ -640,9 +669,8 @@ class _ProductListPageState extends State<ProductListPage> {
                     children: filteredProducts
                         .map(
                           (product) => ProductItem(
-                            productName: product.productName,
-                            price: product.price,
-                            discountPrice: product.discountPrice,
+                            product: product,
+                            onAddToCart: _addToCart,
                           ),
                         )
                         .toList(),
@@ -652,9 +680,9 @@ class _ProductListPageState extends State<ProductListPage> {
                     itemBuilder: (context, index) {
                       final product = filteredProducts[index];
                       return ProductItem(
-                        productName: product.productName,
-                        price: product.price,
-                        discountPrice: product.discountPrice,
+                        product: product,
+                        onAddToCart: _addToCart,
+
                         isRow: true,
                       );
                     },
