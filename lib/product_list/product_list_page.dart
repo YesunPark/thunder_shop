@@ -20,7 +20,7 @@ List<Product> allProducts = [
     price: 11000,
     discountPrice: 8900,
     mainImageUrl: 'assets/img1.png',
-    imageUrls: [],
+    imageUrls: ['assets/img35.png', 'assets/img36.png', 'assets/img37.png'],
     videoUrl: null,
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
