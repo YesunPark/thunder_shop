@@ -3,8 +3,13 @@ import '../../model/product.dart';
 
 class ProductReviewSection extends StatelessWidget {
   final List<ProductReview> reviews;
+  final void Function(int)? onReviewCountChanged; // ✅ 리뷰 수 전달 콜백
 
-  const ProductReviewSection({super.key, required this.reviews});
+  const ProductReviewSection({
+    super.key,
+    required this.reviews,
+    this.onReviewCountChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,6 +23,13 @@ class ProductReviewSection extends StatelessWidget {
     final List<ProductReview> displayReviews = reviews.isEmpty
         ? dummyReviews
         : reviews;
+
+    // 콜백으로 리뷰 수 전달 (build 후 실행)
+    if (onReviewCountChanged != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        onReviewCountChanged!(displayReviews.length);
+      });
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
