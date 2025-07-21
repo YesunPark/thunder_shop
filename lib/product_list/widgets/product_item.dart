@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // 👈 꼭 추가!
+import 'package:thunder_shop/model/cart_item.dart';
 import 'package:thunder_shop/model/product.dart';
 import 'package:thunder_shop/product_detail/product_detail_page.dart';
-import 'package:thunder_shop/model/favorite_button.dart';
 
 class ProductItem extends StatefulWidget {
   final Product product;
-  final VoidCallback? onTap;
+  final List<CartItem> cartItems;
   final void Function(Product)? onAddToCart;
   final bool isRow;
 
   const ProductItem({
     required this.product,
-    this.onTap,
+    required this.cartItems,
     this.onAddToCart,
     this.isRow = false,
     super.key,
@@ -32,9 +32,6 @@ class _ProductItemState extends State<ProductItem> {
   void _addToCart(BuildContext context) {
     if (widget.onAddToCart != null) {
       widget.onAddToCart!(widget.product);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('장바구니에 추가되었습니다')));
     }
   }
 
@@ -42,10 +39,13 @@ class _ProductItemState extends State<ProductItem> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ProductDetailPage(product: widget.product),
+        builder: (_) => ProductDetailPage(
+          product: widget.product,
+          onAddToCart: widget.onAddToCart!,
+          cartItems: widget.cartItems,
+        ),
       ),
     ).then((_) {
-      // 상세페이지에서 돌아올 때 상태 갱신
       setState(() {});
     });
   }

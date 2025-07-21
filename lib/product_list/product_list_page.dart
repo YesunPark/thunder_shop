@@ -4,6 +4,7 @@ import 'package:thunder_shop/model/cart_item.dart';
 
 import 'package:thunder_shop/product_register/product_register_page.dart';
 import '../cart/cart_page.dart';
+import '../product_detail/product_detail_page.dart';
 
 import 'widgets/category_selector.dart';
 import 'widgets/product_item.dart';
@@ -713,6 +714,10 @@ class _ProductListPageState extends State<ProductListPage> {
         cartItems.add(CartItem(product: product));
       }
     });
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('장바구니에 추가되었습니다')));
   }
 
   Future<void> goToRegisterPage() async {
@@ -828,6 +833,7 @@ class _ProductListPageState extends State<ProductListPage> {
                           (product) => ProductItem(
                             product: product,
                             onAddToCart: _addToCart,
+                            cartItems: cartItems,
                           ),
                         )
                         .toList(),
@@ -839,7 +845,7 @@ class _ProductListPageState extends State<ProductListPage> {
                       return ProductItem(
                         product: product,
                         onAddToCart: _addToCart,
-
+                        cartItems: cartItems,
                         isRow: true,
                       );
                     },
