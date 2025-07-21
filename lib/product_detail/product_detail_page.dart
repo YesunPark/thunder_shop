@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:thunder_shop/model/cart_item.dart';
 import '../model/product.dart';
 import 'widgets/product_image_slider.dart';
 import 'widgets/product_price_info.dart';
@@ -6,11 +7,19 @@ import 'widgets/purchase_bottom_sheet.dart';
 import 'widgets/product_review.dart'; // ✅ 수정된 리뷰 표시용 위젯
 import 'package:thunder_shop/model/favorite_button.dart';
 import 'package:thunder_shop/style/common_colors.dart';
+import 'package:thunder_shop/cart/cart_page.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final Product product;
+  final List<CartItem> cartItems;
+  final void Function(Product) onAddToCart;
 
-  const ProductDetailPage({super.key, required this.product});
+  const ProductDetailPage({
+    super.key,
+    required this.product,
+    required this.cartItems,
+    required this.onAddToCart,
+  });
 
   @override
   State<ProductDetailPage> createState() => _ProductDetailPageState();
@@ -48,6 +57,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     );
   }
 
+  // 장바구니 담기 로직
+  void _addToCart(BuildContext context) {
+    widget.onAddToCart(widget.product);
+  }
+
   @override
   Widget build(BuildContext context) {
     final product = widget.product;
@@ -60,8 +74,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.pushNamed(context, '/cart');
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CartPage(cartItems: widget.cartItems),
+                ),
+              );
             },
+            // 장바구니 아이콘
             icon: const Icon(Icons.shopping_cart_outlined),
           ),
         ],
@@ -170,7 +190,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               ),
               IconButton(
                 icon: const Icon(Icons.add_shopping_cart_outlined, size: 30),
-                onPressed: () => showPurchaseSheet(context),
+                onPressed: () => _addToCart(context),
               ),
               const SizedBox(width: 12),
               Expanded(
