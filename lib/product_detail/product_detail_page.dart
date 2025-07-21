@@ -3,6 +3,7 @@ import '../model/product.dart';
 import 'widgets/product_image_slider.dart';
 import 'widgets/product_price_info.dart';
 import 'widgets/purchase_bottom_sheet.dart';
+import 'package:thunder_shop/model/favorite_button.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final Product product;
@@ -20,6 +21,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     return widget.product.imageUrls.isNotEmpty
         ? widget.product.imageUrls
         : ['https://picsum.photos/seed/${widget.product.id}/300/250'];
+  }
+
+  void toggleFavorite() {
+    setState(() {
+      widget.product.isLiked = !widget.product.isLiked; // ✅ 찜 상태 토글
+    });
   }
 
   void showPurchaseSheet(BuildContext context) {
@@ -143,9 +150,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Row(
             children: [
-              IconButton(
-                icon: const Icon(Icons.favorite_border),
-                onPressed: () {},
+              FavoriteButton(
+                isFavorite: widget.product.isLiked,
+                onToggle: toggleFavorite,
+                size: 30,
+                activeColor: Colors.pink,
+                inactiveColor: Colors.black,
               ),
               IconButton(
                 icon: const Icon(Icons.add_shopping_cart_outlined),

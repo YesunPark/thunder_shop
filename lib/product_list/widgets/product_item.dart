@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:thunder_shop/product_detail/product_detail_page.dart'; // 상세 페이지 import
+import 'package:thunder_shop/product_detail/product_detail_page.dart';
 import 'package:thunder_shop/model/product.dart';
+import 'package:thunder_shop/model/favorite_button.dart';
 
 class ProductItem extends StatefulWidget {
   final Product product;
-  final VoidCallback? onTap; // ProductItem을 눌렀을 때 동작하는 로직을 목록화면에서 받아온다.
-  final void Function(Product)? onAddToCart; // 장바구니 추가 로직을 목록화면에서 받아온다.
+  final VoidCallback? onTap;
+  final void Function(Product)? onAddToCart;
   final bool isRow;
 
   const ProductItem({
@@ -21,14 +22,12 @@ class ProductItem extends StatefulWidget {
 }
 
 class _ProductItemState extends State<ProductItem> {
-  bool isFavorite = false;
-
-  // 찜하기 / 찜 해제
   void toggleFavorite() {
-    setState(() => isFavorite = !isFavorite);
+    setState(() {
+      widget.product.isLiked = !widget.product.isLiked;
+    });
   }
 
-  // 장바구니 추가 로직
   void _addToCart(BuildContext context) {
     if (widget.onAddToCart != null) {
       widget.onAddToCart!(widget.product);
@@ -38,14 +37,16 @@ class _ProductItemState extends State<ProductItem> {
     }
   }
 
-  //  상세페이지 이동 시 product 넘기기
   void _goToDetailPage(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => ProductDetailPage(product: widget.product),
       ),
-    );
+    ).then((_) {
+      // 상세페이지에서 돌아올 때 상태 갱신
+      setState(() {});
+    });
   }
 
   @override
@@ -61,13 +62,12 @@ class _ProductItemState extends State<ProductItem> {
         Positioned(
           top: 6,
           right: 6,
-          child: IconButton(
-            onPressed: toggleFavorite,
-            icon: Icon(
-              isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: isFavorite ? Colors.red : Colors.grey,
-              size: 24,
-            ),
+          child: FavoriteButton(
+            isFavorite: widget.product.isLiked,
+            onToggle: toggleFavorite,
+            size: 24,
+            activeColor: Colors.red,
+            inactiveColor: Colors.grey,
           ),
         ),
       ],
@@ -89,7 +89,6 @@ class _ProductItemState extends State<ProductItem> {
           )
         : Text('${widget.product.price}원');
 
-    // _goToDetailPage(context)로 상세페이지 이동 연결
     final tappableContent = GestureDetector(
       onTap: () => _goToDetailPage(context),
       behavior: HitTestBehavior.translucent,
