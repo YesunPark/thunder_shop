@@ -12,7 +12,8 @@ class Product {
   final String? videoUrl; // 동영상 URL (선택)
   final String shippingInfo; // 배송 정보
   final int shippingFee; // 배송비
-  final bool isLiked; // 좋아요 여부
+
+  bool isLiked; // 좋아요 여부
 
   Product({
     required this.id,
