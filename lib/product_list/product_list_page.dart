@@ -598,13 +598,12 @@ class _ProductListPageState extends State<ProductListPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TextButton(
+                TextButton.icon(
                   onPressed: goToRegisterPage,
-                  child: const Text(
-                    '상품 등록',
-                    style: TextStyle(color: Colors.black),
-                  ),
+                  icon: Icon(Icons.add_box, color: Colors.black),
+                  label: Text('상품 등록', style: TextStyle(color: Colors.black)),
                 ),
+
                 IconButton(
                   onPressed: goToCartPage,
                   icon: const Icon(Icons.shopping_cart_outlined),
@@ -665,7 +664,7 @@ class _ProductListPageState extends State<ProductListPage> {
                     crossAxisCount: 2,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
-                    childAspectRatio: 0.65,
+                    childAspectRatio: 0.58,
                     children: filteredProducts
                         .map(
                           (product) => ProductItem(
