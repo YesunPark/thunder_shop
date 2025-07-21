@@ -12,8 +12,8 @@ class Product {
   final String? videoUrl; // 동영상 URL (선택)
   final String shippingInfo; // 배송 정보
   final int shippingFee; // 배송비
-
   bool isLiked; // 좋아요 여부
+  List<ProductReview> reviewList; // 리뷰 목록
 
   Product({
     required this.id,
@@ -29,5 +29,14 @@ class Product {
     required this.shippingInfo,
     required this.shippingFee,
     required this.isLiked,
+    this.reviewList = const [], // 기본값 설정
   });
+}
+
+// 리뷰 클래스
+class ProductReview {
+  final String userName;
+  final String content;
+
+  ProductReview({required this.userName, required this.content});
 }
