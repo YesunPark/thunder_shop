@@ -2,9 +2,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:thunder_shop/model/product.dart';
+import 'package:thunder_shop/product_detail/product_detail_page.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 
 class ProductRegisterPage extends StatefulWidget {
-  // (변경) 마지막 id 값을 받는다!
   final int lastId;
   const ProductRegisterPage({super.key, required this.lastId});
 
@@ -26,6 +27,7 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
   String? _mainImageUrl;
   String? _descImageUrl;
   String? _videoUrl;
+  String? _videoThumbnailPath;
   List<String> _imageUrls = [];
   bool _isPicking = false;
   double? _discountPercent;
@@ -68,26 +70,24 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('할인된 가격을 입력해주세요.')));
+        ).showSnackBar(const SnackBar(content: Text('할인된 가격을 입력해주세요.')));
         _discountPriceController.clear();
       });
     }
   }
 
   Widget buildDeleteButton(VoidCallback onTap) {
-    return Container(
-      width: 28,
-      height: 28,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.8),
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.grey[400]!, width: 1),
-        boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1)),
-        ],
-      ),
-      child: Center(
-        child: Icon(Icons.close_rounded, color: Colors.grey[700], size: 18),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 26,
+        height: 26,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 3)],
+        ),
+        child: Icon(Icons.close, size: 18, color: Colors.grey[700]),
       ),
     );
   }
@@ -148,7 +148,17 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
       if (video != null) {
         setState(() {
           _videoUrl = video.path;
+          _videoThumbnailPath = null;
         });
+        final String? thumb = await VideoThumbnail.thumbnailFile(
+          video: video.path,
+          imageFormat: ImageFormat.PNG,
+          maxWidth: 180,
+          quality: 75,
+        );
+        if (thumb != null) {
+          setState(() => _videoThumbnailPath = thumb);
+        }
       }
     } catch (e) {
       ScaffoldMessenger.of(
@@ -159,30 +169,30 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
     }
   }
 
-  void _registerProduct() {
+  void _registerProduct() async {
     if (_formKey.currentState?.validate() != true) return;
     if (_mainImageUrl == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('대표 이미지를 등록해 주세요!')));
+      ).showSnackBar(const SnackBar(content: Text('대표 이미지를 등록해 주세요!')));
       return;
     }
     if (_descImageUrl == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('상품설명 이미지를 등록해 주세요!')));
+      ).showSnackBar(const SnackBar(content: Text('상품설명 이미지를 등록해 주세요!')));
       return;
     }
     if (_selectedCategory == null || _selectedSubCategory == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('카테고리를 선택해 주세요!')));
+      ).showSnackBar(const SnackBar(content: Text('카테고리를 선택해 주세요!')));
       return;
     }
     if (_shippingInfoController.text.trim().isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('배송 정보를 입력해 주세요!')));
+      ).showSnackBar(const SnackBar(content: Text('배송 정보를 입력해 주세요!')));
       return;
     }
     int price = int.tryParse(_priceController.text) ?? 0;
@@ -190,12 +200,11 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
     if (discountPrice > price) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('할인가는 판매가보다 높을 수 없습니다!')));
+      ).showSnackBar(const SnackBar(content: Text('할인가는 판매가보다 높을 수 없습니다!')));
       return;
     }
     int shippingFee = int.tryParse(_shippingFeeController.text) ?? 0;
 
-    // (변경!) id는 lastId+1로 자동생성
     final product = Product(
       id: (widget.lastId + 1).toString(),
       productName: _productNameController.text.trim(),
@@ -209,313 +218,606 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
       videoUrl: _videoUrl,
       shippingInfo: _shippingInfoController.text.trim(),
       shippingFee: shippingFee,
-      isLiked: false, // 좋아요 표기여부 추가
+      isLiked: false,
     );
 
-    // Navigator.pop으로 product 반환 (목록에 추가)
+    // 등록 완료 팝업 후 pop
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        content: const Text('상품 등록이 완료되었습니다.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+
     Navigator.pop(context, product);
   }
+
+  // --- 미리보기 기능 추가 ---
+  void _previewProduct() {
+    if (_productNameController.text.trim().isEmpty ||
+        _mainImageUrl == null ||
+        _descImageUrl == null ||
+        _selectedCategory == null ||
+        _selectedSubCategory == null ||
+        _priceController.text.trim().isEmpty ||
+        _shippingInfoController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('미리보기를 위해 필수 항목(*)을 모두 입력해주세요!')),
+      );
+      return;
+    }
+
+    final price = int.tryParse(_priceController.text) ?? 0;
+    final discountPrice = int.tryParse(_discountPriceController.text) ?? 0;
+    final shippingFee = int.tryParse(_shippingFeeController.text) ?? 0;
+
+    final dummyProduct = Product(
+      id: "preview_id", // 미리보기용 임시 ID
+      productName: _productNameController.text.trim(),
+      descImageUrl: _descImageUrl!,
+      category: _selectedCategory!,
+      categoryDetail: _selectedSubCategory!,
+      price: price,
+      discountPrice: discountPrice,
+      mainImageUrl: _mainImageUrl!,
+      imageUrls: _imageUrls,
+      videoUrl: _videoUrl,
+      shippingInfo: _shippingInfoController.text.trim(),
+      shippingFee: shippingFee,
+      isLiked: false, // 미리보기에서는 좋아요 상태는 중요하지 않으므로 false로 설정
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProductDetailPage(
+          product: dummyProduct,
+          // isPreview: true, // 미리보기 모드임을 전달
+        ),
+      ),
+    );
+  }
+  // --- 미리보기 기능 추가 끝 ---
 
   @override
   void dispose() {
     _priceController.removeListener(_onPriceOrDiscountChanged);
     _discountPriceController.removeListener(_onPriceOrDiscountChanged);
+    _productNameController.dispose();
+    _priceController.dispose();
+    _discountPriceController.dispose();
+    _shippingFeeController.dispose();
+    _shippingInfoController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final priceValue = int.tryParse(_priceController.text) ?? 0;
+    final mainBlue = const Color(0xFF279AF1);
+    final borderRadius = BorderRadius.circular(14);
 
     return Scaffold(
-      appBar: AppBar(title: Text('상품 등록')),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text(
+          '상품 등록',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: SafeArea(
+        child: Column(
           children: [
-            // 1. 대표 이미지 등록
-            Text('대표 이미지*'),
-            _mainImageUrl == null
-                ? ElevatedButton.icon(
-                    icon: Icon(Icons.add_photo_alternate),
-                    label: Text('이미지 선택'),
-                    onPressed: _pickMainImage,
-                  )
-                : Stack(
-                    children: [
-                      Image.file(
-                        File(_mainImageUrl!),
-                        width: 100,
-                        height: 100,
-                        fit: BoxFit.cover,
-                      ),
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _mainImageUrl = null;
-                            });
-                          },
-                          child: buildDeleteButton(() {
-                            setState(() {
-                              _mainImageUrl = null;
-                            });
-                          }),
-                        ),
-                      ),
-                    ],
+            Expanded(
+              child: Form(
+                key: _formKey,
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 16,
                   ),
-            SizedBox(height: 16),
-
-            // 2. 추가 이미지 등록(여러장)
-            Text('추가 이미지 (${_imageUrls.length}/9)'),
-            Wrap(
-              spacing: 8,
-              children: [
-                ..._imageUrls.map(
-                  (path) => Stack(
-                    children: [
-                      Image.file(
-                        File(path),
-                        width: 60,
-                        height: 60,
-                        fit: BoxFit.cover,
-                      ),
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _imageUrls.remove(path);
-                            });
-                          },
-                          child: buildDeleteButton(() {
-                            setState(() {
-                              _imageUrls.remove(path);
-                            });
-                          }),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (_imageUrls.length < 9)
-                  IconButton(
-                    icon: Icon(Icons.add_box),
-                    onPressed: _pickAdditionalImages,
-                  ),
-              ],
-            ),
-            SizedBox(height: 16),
-
-            // 3. 동영상 등록(선택)
-            Text('동영상(선택)'),
-            _videoUrl == null
-                ? ElevatedButton.icon(
-                    icon: Icon(Icons.video_library),
-                    label: Text('동영상 선택'),
-                    onPressed: _pickVideo,
-                  )
-                : Stack(
-                    children: [
-                      Container(
-                        width: 100,
-                        height: 60,
-                        color: Colors.black12,
-                        child: Center(child: Icon(Icons.videocam, size: 40)),
-                      ),
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _videoUrl = null;
-                            });
-                          },
-                          child: buildDeleteButton(() {
-                            setState(() {
-                              _videoUrl = null;
-                            });
-                          }),
-                        ),
-                      ),
-                    ],
-                  ),
-            SizedBox(height: 16),
-
-            // 4. 상품설명 이미지 (한 장)
-            Text('상품설명 이미지*'),
-            _descImageUrl == null
-                ? ElevatedButton.icon(
-                    icon: Icon(Icons.add_photo_alternate),
-                    label: Text('설명 이미지 선택'),
-                    onPressed: _pickDescImage,
-                  )
-                : Stack(
-                    children: [
-                      Image.file(
-                        File(_descImageUrl!),
-                        width: 120,
-                        height: 80,
-                        fit: BoxFit.cover,
-                      ),
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _descImageUrl = null;
-                            });
-                          },
-                          child: buildDeleteButton(() {
-                            setState(() {
-                              _descImageUrl = null;
-                            });
-                          }),
-                        ),
-                      ),
-                    ],
-                  ),
-            SizedBox(height: 16),
-
-            // 5. 카테고리/소분류
-            DropdownButtonFormField<String>(
-              value: _selectedCategory,
-              items: _categories
-                  .map((cat) => DropdownMenuItem(value: cat, child: Text(cat)))
-                  .toList(),
-              onChanged: (val) {
-                setState(() {
-                  _selectedCategory = val;
-                  _selectedSubCategory = null;
-                });
-              },
-              decoration: InputDecoration(labelText: '대분류*'),
-              validator: (v) => v == null ? '대분류를 선택해 주세요.' : null,
-            ),
-            SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              value: _selectedSubCategory,
-              items: (_selectedCategory == null)
-                  ? []
-                  : _subCategories[_selectedCategory!]!
-                        .map(
-                          (sub) =>
-                              DropdownMenuItem(value: sub, child: Text(sub)),
-                        )
-                        .toList(),
-              onChanged: (val) {
-                setState(() {
-                  _selectedSubCategory = val;
-                });
-              },
-              decoration: InputDecoration(labelText: '소분류*'),
-              validator: (v) => v == null ? '소분류를 선택해 주세요.' : null,
-            ),
-            SizedBox(height: 16),
-
-            // 6. 상품명
-            TextFormField(
-              controller: _productNameController,
-              decoration: InputDecoration(
-                labelText: '상품명*',
-                border: OutlineInputBorder(),
-              ),
-              validator: (v) => v == null || v.isEmpty ? '상품명을 입력해 주세요.' : null,
-            ),
-            SizedBox(height: 16),
-
-            // 7. 가격/할인가
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _priceController,
-                    decoration: InputDecoration(
-                      labelText: '판매가* (원)',
-                      border: OutlineInputBorder(),
+                  children: [
+                    // 대표 이미지
+                    const Text(
+                      '대표 이미지 *',
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    keyboardType: TextInputType.number,
-                  ),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: TextFormField(
-                    controller: _discountPriceController,
-                    decoration: InputDecoration(
-                      labelText: '할인가 (원)',
-                      border: OutlineInputBorder(),
+                    const SizedBox(height: 8),
+                    _mainImageUrl == null
+                        ? InkWell(
+                            onTap: _pickMainImage,
+                            borderRadius: borderRadius,
+                            child: Container(
+                              height: 140,
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: borderRadius,
+                                border: Border.all(color: mainBlue, width: 2),
+                              ),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.add_a_photo_rounded,
+                                  color: Colors.blue,
+                                  size: 36,
+                                ),
+                              ),
+                            ),
+                          )
+                        : Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: borderRadius,
+                                child: Image.file(
+                                  File(_mainImageUrl!),
+                                  width: double.infinity,
+                                  height: 140,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                top: 8,
+                                right: 8,
+                                child: buildDeleteButton(() {
+                                  setState(() => _mainImageUrl = null);
+                                }),
+                              ),
+                            ],
+                          ),
+                    const SizedBox(height: 24),
+                    // 추가 이미지
+                    const Text(
+                      '추가 이미지 (최대 9장)',
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    keyboardType: TextInputType.number,
-                    enabled: _priceController.text.isNotEmpty, // 판매가 입력 전엔 비활성화
-                  ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 120,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _imageUrls.length + 1,
+                        itemBuilder: (context, index) {
+                          if (index == _imageUrls.length) {
+                            if (_imageUrls.length < 9) {
+                              return InkWell(
+                                onTap: _pickAdditionalImages,
+                                borderRadius: borderRadius,
+                                child: Container(
+                                  width: 100,
+                                  height: 100,
+                                  margin: const EdgeInsets.only(right: 10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[200],
+                                    borderRadius: borderRadius,
+                                    border: Border.all(
+                                      color: mainBlue,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.add_a_photo_rounded,
+                                      color: Colors.blue,
+                                      size: 30,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            } else {
+                              return const SizedBox.shrink();
+                            }
+                          }
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 10),
+                            child: Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: borderRadius,
+                                  child: Image.file(
+                                    File(_imageUrls[index]),
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: buildDeleteButton(() {
+                                    setState(() {
+                                      _imageUrls.removeAt(index);
+                                    });
+                                  }),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    // 동영상
+                    const Text(
+                      '동영상',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    _videoUrl == null
+                        ? InkWell(
+                            onTap: _pickVideo,
+                            borderRadius: borderRadius,
+                            child: Container(
+                              height: 140,
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: borderRadius,
+                                border: Border.all(color: mainBlue, width: 2),
+                              ),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.video_collection_rounded,
+                                  color: Colors.blue,
+                                  size: 36,
+                                ),
+                              ),
+                            ),
+                          )
+                        : Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: borderRadius,
+                                child: _videoThumbnailPath != null
+                                    ? Image.file(
+                                        File(_videoThumbnailPath!),
+                                        width: double.infinity,
+                                        height: 140,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Container(
+                                        width: double.infinity,
+                                        height: 140,
+                                        color: Colors.black,
+                                        child: Center(
+                                          child: CircularProgressIndicator(
+                                            color: mainBlue,
+                                          ),
+                                        ),
+                                      ),
+                              ),
+                              const Positioned.fill(
+                                child: Icon(
+                                  Icons.play_circle_fill,
+                                  color: Colors.white70,
+                                  size: 60,
+                                ),
+                              ),
+                              Positioned(
+                                top: 8,
+                                right: 8,
+                                child: buildDeleteButton(() {
+                                  setState(() {
+                                    _videoUrl = null;
+                                    _videoThumbnailPath = null;
+                                  });
+                                }),
+                              ),
+                            ],
+                          ),
+                    const SizedBox(height: 24),
+                    // 상품 설명 이미지
+                    const Text(
+                      '상품 설명 이미지 *',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    _descImageUrl == null
+                        ? InkWell(
+                            onTap: _pickDescImage,
+                            borderRadius: borderRadius,
+                            child: Container(
+                              height: 140,
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: borderRadius,
+                                border: Border.all(color: mainBlue, width: 2),
+                              ),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.description_rounded,
+                                  color: Colors.blue,
+                                  size: 36,
+                                ),
+                              ),
+                            ),
+                          )
+                        : Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: borderRadius,
+                                child: Image.file(
+                                  File(_descImageUrl!),
+                                  width: double.infinity,
+                                  height: 140,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                top: 8,
+                                right: 8,
+                                child: buildDeleteButton(() {
+                                  setState(() => _descImageUrl = null);
+                                }),
+                              ),
+                            ],
+                          ),
+                    const SizedBox(height: 24),
+                    // 상품명
+                    const Text(
+                      '상품명 *',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _productNameController,
+                      decoration: InputDecoration(
+                        hintText: '상품명을 입력해주세요.',
+                        border: OutlineInputBorder(borderRadius: borderRadius),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return '상품명을 입력해주세요.';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    // 카테고리
+                    const Text(
+                      '카테고리 *',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: _selectedCategory,
+                      decoration: InputDecoration(
+                        hintText: '카테고리를 선택하세요',
+                        border: OutlineInputBorder(borderRadius: borderRadius),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                      items: _categories.map((String category) {
+                        return DropdownMenuItem<String>(
+                          value: category,
+                          child: Text(category),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedCategory = newValue;
+                          _selectedSubCategory = null;
+                        });
+                      },
+                      validator: (value) {
+                        if (value == null) {
+                          return '카테고리를 선택해주세요.';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: _selectedSubCategory,
+                      decoration: InputDecoration(
+                        hintText: '세부 카테고리를 선택하세요',
+                        border: OutlineInputBorder(borderRadius: borderRadius),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                      items: _selectedCategory == null
+                          ? []
+                          : _subCategories[_selectedCategory!]!.map((
+                              String subCategory,
+                            ) {
+                              return DropdownMenuItem<String>(
+                                value: subCategory,
+                                child: Text(subCategory),
+                              );
+                            }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedSubCategory = newValue;
+                        });
+                      },
+                      validator: (value) {
+                        if (value == null) {
+                          return '세부 카테고리를 선택해주세요.';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    // 가격 정보
+                    const Text(
+                      '가격 정보 *',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _priceController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText: '판매가',
+                        border: OutlineInputBorder(borderRadius: borderRadius),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        suffixText: '원',
+                      ),
+                      validator: (value) {
+                        if (value == null ||
+                            value.trim().isEmpty ||
+                            int.tryParse(value) == null ||
+                            int.parse(value) <= 0) {
+                          return '유효한 판매가를 입력해주세요.';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _discountPriceController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText: '할인가 (선택 사항)',
+                        border: OutlineInputBorder(borderRadius: borderRadius),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        suffix: (_discountPercent != null)
+                            ? Padding(
+                                padding: const EdgeInsets.only(left: 2),
+                                child: Text(
+                                  '${_discountPercent!.toStringAsFixed(0)}% 할인',
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              )
+                            : null,
+                      ),
+                      validator: (value) {
+                        if (value != null && value.isNotEmpty) {
+                          if (int.tryParse(value) == null ||
+                              int.parse(value) < 0) {
+                            return '유효한 할인 가격을 입력해주세요.';
+                          }
+                          if ((int.tryParse(value) ?? 0) >=
+                                  (int.tryParse(_priceController.text) ?? 0) &&
+                              (int.tryParse(_priceController.text) ?? 0) != 0) {
+                            return '할인가는 판매가보다 작아야 합니다.';
+                          }
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    // 배송 정보
+                    const Text(
+                      '배송 정보 *',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _shippingInfoController,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        hintText: '배송 정보를 입력해주세요.',
+                        border: OutlineInputBorder(borderRadius: borderRadius),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return '배송 정보를 입력해주세요.';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    // 배송비
+                    const Text(
+                      '배송비',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _shippingFeeController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText: '배송비를 입력해주세요 (무료 배송시 0)',
+                        border: OutlineInputBorder(borderRadius: borderRadius),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        suffixText: '원',
+                      ),
+                      validator: (value) {
+                        if (value != null && value.isNotEmpty) {
+                          if (int.tryParse(value) == null ||
+                              int.parse(value) < 0) {
+                            return '유효한 배송비를 입력해주세요.';
+                          }
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                  ],
                 ),
-              ],
-            ),
-
-            // 할인율
-            if (_discountPercent != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Text(
-                  '-${_discountPercent!.toStringAsFixed(1)}%',
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
               ),
-
-            SizedBox(height: 16),
-
-            // 8. 배송 정보
-            TextFormField(
-              controller: _shippingInfoController,
-              decoration: InputDecoration(
-                labelText: '배송정보* (택배사명 등)',
-                border: OutlineInputBorder(),
-              ),
-              validator: (v) =>
-                  v == null || v.isEmpty ? '배송 정보를 입력해 주세요.' : null,
             ),
-            SizedBox(height: 8),
-            TextFormField(
-              controller: _shippingFeeController,
-              decoration: InputDecoration(
-                labelText: '배송비* (원)',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-              validator: (v) => v == null || v.isEmpty ? '배송비를 입력해 주세요.' : null,
-            ),
-            SizedBox(height: 80),
           ],
         ),
       ),
       bottomNavigationBar: SafeArea(
-        child: Container(
-          color: Colors.white,
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 0, 18, 16),
           child: Row(
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: _registerProduct,
-                  child: Text('미리보기'),
+                  onPressed: _previewProduct,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: mainBlue,
+                    side: BorderSide(color: mainBlue, width: 1.6),
+                    shape: RoundedRectangleBorder(borderRadius: borderRadius),
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                  ),
+                  child: const Text(
+                    '미리보기',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
-              SizedBox(width: 16),
+              const SizedBox(width: 14),
               Expanded(
                 child: ElevatedButton(
                   onPressed: _registerProduct,
-                  child: Text('등록하기'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: mainBlue,
+                    shape: RoundedRectangleBorder(borderRadius: borderRadius),
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                  ),
+                  child: const Text(
+                    '등록하기',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ],
