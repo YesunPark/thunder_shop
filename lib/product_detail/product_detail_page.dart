@@ -1,199 +1,177 @@
 import 'package:flutter/material.dart';
+import '../model/product.dart';
+import 'widgets/product_image_slider.dart';
+import 'widgets/product_price_info.dart';
+import 'widgets/purchase_bottom_sheet.dart';
 
-class ProductDetailPage extends StatelessWidget {
-  final bool showBottomBar; // true: 하단 결제 바 있는 화면
+class ProductDetailPage extends StatefulWidget {
+  final Product product;
 
-  const ProductDetailPage({super.key, this.showBottomBar = false});
+  const ProductDetailPage({super.key, required this.product});
+
+  @override
+  State<ProductDetailPage> createState() => _ProductDetailPageState();
+}
+
+class _ProductDetailPageState extends State<ProductDetailPage> {
+  int _currentIndex = 0;
+
+  List<String> get imageList {
+    return widget.product.imageUrls.isNotEmpty
+        ? widget.product.imageUrls
+        : ['https://picsum.photos/seed/${widget.product.id}/300/250'];
+  }
+
+  void showPurchaseSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => PurchaseBottomSheet(
+        productName: widget.product.productName,
+        originalPrice: widget.product.price,
+        salePrice: widget.product.discountPrice,
+        imageUrl: imageList[0],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final product = widget.product;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('홈페이지 제목'),
+        title: const Text('상품 상세'),
         centerTitle: true,
         leading: const BackButton(),
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.shopping_cart)),
+          IconButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/cart');
+            },
+            icon: const Icon(Icons.shopping_cart_outlined),
+          ),
         ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // 이미지 영역
+          ProductImageSlider(
+            imageList: imageList,
+            currentIndex: _currentIndex,
+            onPageChanged: (index) {
+              setState(() => _currentIndex = index);
+            },
+          ),
+          const SizedBox(height: 16),
+
+          Text(
+            product.productName,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+
+          ProductPriceInfo(
+            originalPrice: product.price,
+            salePrice: product.discountPrice,
+          ),
+          const SizedBox(height: 24),
+
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('배송정보', style: TextStyle(fontWeight: FontWeight.bold)),
+                  SizedBox(height: 8),
+                  Text('배송비', style: TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
+              const SizedBox(width: 40),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(product.shippingInfo),
+                  const SizedBox(height: 8),
+                  Text('${product.shippingFee}원'),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          const Text('상품 세부정보', style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
           Container(
-            height: 250,
-            color: Colors.grey[300],
+            height: 150,
+            width: double.infinity,
+            color: Colors.grey[200],
             alignment: Alignment.center,
-            child: const Text('상품 이미지'),
+            child: const Text('이미지'),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
 
-          // 상품 제목 및 가격
-          const Text(
-            '부드러운 닭가슴살 12팩',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: const [
+              Text('상품 후기', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('총 2개'),
+            ],
           ),
+          const SizedBox(height: 12),
+          const Text('이름1', style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
-          const Text(
-            '29,000원 → 25,000원 (-66%)',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.red,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // 배송 정보 입력
-          const TextField(
-            decoration: InputDecoration(
-              labelText: '배송 받을 이름',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 8),
-          const TextField(
-            decoration: InputDecoration(
-              labelText: '배송지',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // 상품 설명
-          const TextField(
-            maxLines: 4,
-            decoration: InputDecoration(
-              labelText: '상품 설명/요청사항',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // 후기
-          const Text('후기'),
-          const SizedBox(height: 8),
-          reviewBox('좋아요'),
-          const SizedBox(height: 8),
-          reviewBox('맛이 부드럽고 양도 넉넉해요'),
-          const SizedBox(height: 8),
+          const Text('맛이 부드럽고 양도 넉넉해요'),
+          const SizedBox(height: 12),
+          const Text('이름2', style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 4),
+          const Text('배송도 빠르고 만족해요'),
+          const SizedBox(height: 12),
           GestureDetector(
             onTap: () {},
-            child: const Text('리뷰 더보기 >', style: TextStyle(color: Colors.blue)),
+            child: const Text('상품 문의 >', style: TextStyle(color: Colors.blue)),
           ),
-          const SizedBox(height: 80), // Bottom bar 공간 확보
+          const SizedBox(height: 80),
         ],
       ),
-
-      // 하단 바
-      bottomNavigationBar: showBottomBar
-          ? bottomBarWithPrice(context)
-          : basicBottomBar(context),
-    );
-  }
-
-  // 기본 하단 바
-  Widget basicBottomBar(BuildContext context) {
-    return BottomAppBar(
-      child: SizedBox(
-        height: 60,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.favorite_border),
-              onPressed: () {},
-            ),
-            IconButton(
-              icon: const Icon(Icons.shopping_cart_outlined),
-              onPressed: () {},
-            ),
-            Expanded(
-              child: ElevatedButton(
+      bottomNavigationBar: BottomAppBar(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.favorite_border),
                 onPressed: () {},
-                child: const Text('구매하기'),
               ),
-            ),
-          ],
+              IconButton(
+                icon: const Icon(Icons.add_shopping_cart_outlined),
+                onPressed: () => showPurchaseSheet(context),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SizedBox(
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () => showPurchaseSheet(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                    ),
+                    child: const Text('구매하기', style: TextStyle(fontSize: 16)),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-    );
-  }
-
-  // 결제 정보가 포함된 하단 바
-  Widget bottomBarWithPrice(BuildContext context) {
-    return BottomAppBar(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Divider(),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                // 미리보기 이미지
-                Container(
-                  width: 50,
-                  height: 50,
-                  color: Colors.grey[300],
-                  child: const Icon(Icons.image),
-                ),
-                const SizedBox(width: 8),
-                const Expanded(
-                  child: Text('부드러운 닭가슴살 12팩', style: TextStyle(fontSize: 14)),
-                ),
-                const Text(
-                  '50,000원',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
-          const Divider(),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.favorite_border),
-                  onPressed: () {},
-                ),
-                IconButton(
-                  icon: const Icon(Icons.shopping_cart_outlined),
-                  onPressed: () {},
-                ),
-                const Spacer(),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 40,
-                      vertical: 12,
-                    ),
-                  ),
-                  child: const Text('구매하기'),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-        ],
-      ),
-    );
-  }
-
-  // 리뷰 박스 위젯
-  static Widget reviewBox(String content) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(content),
     );
   }
 }
