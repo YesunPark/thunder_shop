@@ -1,116 +1,47 @@
 import 'package:flutter/material.dart';
-import '../../style/common_colors.dart';
+import '../../model/product.dart';
 
-class ProductReview extends StatefulWidget {
-  final void Function(int)? onReviewCountChanged;
-  final bool showForm;
+class ProductReviewSection extends StatelessWidget {
+  final List<ProductReview> reviews;
 
-  const ProductReview({
-    super.key,
-    this.onReviewCountChanged,
-    this.showForm = true,
-  });
-
-  @override
-  State<ProductReview> createState() => _ProductReviewState();
-}
-
-class _ProductReviewState extends State<ProductReview> {
-  final List<Map<String, String>> _reviews = [];
-  final _nicknameController = TextEditingController();
-  final _contentController = TextEditingController();
-
-  void _submitReview() {
-    final nickname = _nicknameController.text.trim();
-    final content = _contentController.text.trim();
-
-    if (nickname.isEmpty || content.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('닉네임과 내용을 모두 입력해주세요.'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
-
-    setState(() {
-      _reviews.add({'nickname': nickname, 'content': content});
-      _nicknameController.clear();
-      _contentController.clear();
-      widget.onReviewCountChanged?.call(_reviews.length);
-    });
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('리뷰가 등록되었습니다.')));
-  }
-
-  @override
-  void dispose() {
-    _nicknameController.dispose();
-    _contentController.dispose();
-    super.dispose();
-  }
+  const ProductReviewSection({super.key, required this.reviews});
 
   @override
   Widget build(BuildContext context) {
+    // 임의 리뷰 데이터 (나중에 제거 예정)
+    final List<ProductReview> dummyReviews = [
+      ProductReview(userName: '홍길동', content: '정말 만족스러운 제품이에요!'),
+      ProductReview(userName: '김민지', content: '배송도 빠르고 품질도 좋아요.'),
+      ProductReview(userName: '이준호', content: '가성비 최고입니다. 다음에도 구매할게요.'),
+    ];
+
+    final List<ProductReview> displayReviews = reviews.isEmpty
+        ? dummyReviews
+        : reviews;
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ..._reviews.map(
-          (review) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    review['nickname']!,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(review['content']!),
-                ),
-              ],
-            ),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Text(
+            '리뷰',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
-        if (widget.showForm) ...[
-          const SizedBox(height: 8),
-          TextField(
-            controller: _nicknameController,
-            decoration: const InputDecoration(
-              labelText: '닉네임',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _contentController,
-            decoration: const InputDecoration(
-              labelText: '후기 내용',
-              border: OutlineInputBorder(),
-            ),
-            maxLines: 3,
-          ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerRight,
-            child: ElevatedButton(
-              onPressed: _submitReview,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: CommonColors.primary,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('등록'),
-            ),
-          ),
-        ],
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: displayReviews.length,
+          itemBuilder: (context, index) {
+            final review = displayReviews[index];
+            return ListTile(
+              leading: const Icon(Icons.person_outline),
+              title: Text(review.userName),
+              subtitle: Text(review.content),
+            );
+          },
+        ),
       ],
     );
   }

@@ -3,9 +3,8 @@ import '../model/product.dart';
 import 'widgets/product_image_slider.dart';
 import 'widgets/product_price_info.dart';
 import 'widgets/purchase_bottom_sheet.dart';
+import 'widgets/product_review.dart'; // ✅ 수정된 리뷰 표시용 위젯
 import 'package:thunder_shop/model/favorite_button.dart';
-import 'widgets/product_review.dart';
-import 'widgets/product_inquiry.dart';
 import 'package:thunder_shop/style/common_colors.dart';
 
 class ProductDetailPage extends StatefulWidget {
@@ -19,9 +18,6 @@ class ProductDetailPage extends StatefulWidget {
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
   int _currentIndex = 0;
-  int _reviewCount = 0;
-
-  bool _showReviewForm = false;
   bool _showInquiryForm = false;
 
   List<String> get imageList {
@@ -136,45 +132,28 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 '상품 후기',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Text('총 $_reviewCount개'),
+              Text('총 ${product.reviewList.length}개'),
             ],
           ),
           const SizedBox(height: 12),
-          ProductReview(
-            onReviewCountChanged: (count) {
-              setState(() {
-                _reviewCount = count;
-              });
-            },
-            showForm: _showReviewForm, // ✅ 폼 표시 여부 전달
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () {
-                setState(() => _showReviewForm = !_showReviewForm);
-              },
-              child: Text(_showReviewForm ? '리뷰 작성 취소' : '리뷰 쓰기'),
-            ),
-          ),
+          ProductReviewSection(reviews: product.reviewList),
 
           const SizedBox(height: 24),
 
           // 🔽 문의 영역
-          const Text('상품 문의', style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          ProductInquiry(showForm: _showInquiryForm), // ✅ 폼 표시 여부 전달
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () {
-                setState(() => _showInquiryForm = !_showInquiryForm);
-              },
-              child: Text(_showInquiryForm ? '문의 작성 취소' : '문의하기'),
-            ),
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '상품 문의 >',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
+                ),
+              ),
+            ],
           ),
-
-          const SizedBox(height: 80),
+          const SizedBox(height: 24),
         ],
       ),
       bottomNavigationBar: BottomAppBar(
@@ -183,14 +162,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           child: Row(
             children: [
               FavoriteButton(
-                isFavorite: widget.product.isLiked,
+                isFavorite: product.isLiked,
                 onToggle: toggleFavorite,
                 size: 30,
                 activeColor: Colors.pink,
                 inactiveColor: Colors.black,
               ),
               IconButton(
-                icon: const Icon(Icons.add_shopping_cart_outlined),
+                icon: const Icon(Icons.add_shopping_cart_outlined, size: 30),
                 onPressed: () => showPurchaseSheet(context),
               ),
               const SizedBox(width: 12),
