@@ -24,6 +24,12 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '안유진', content: '조금 아쉬웠어요.'),
+      ProductReview(userName: '김영희', content: '잘 사용하고 있어요.'),
+      ProductReview(userName: '최수정', content: '운동 후에 먹기 좋아요.'),
+      ProductReview(userName: '이민호', content: '운동 후에 먹기 좋아요.'),
+    ],
   ),
   Product(
     id: '2',
@@ -39,6 +45,16 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '안유진', content: '조금 아쉬웠어요.'),
+      ProductReview(userName: '김영희', content: '잘 사용하고 있어요.'),
+      ProductReview(userName: '최수정', content: '운동 후에 먹기 좋아요.'),
+      ProductReview(userName: '이민호', content: '운동 후에 먹기 좋아요.'),
+      ProductReview(userName: '안유진', content: '조금 아쉬웠어요.'),
+      ProductReview(userName: '김영희', content: '잘 사용하고 있어요.'),
+      ProductReview(userName: '최수정', content: '운동 후에 먹기 좋아요.'),
+      ProductReview(userName: '이민호', content: '운동 후에 먹기 좋아요.'),
+    ],
   ),
   Product(
     id: '3',
@@ -54,6 +70,12 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '안유진', content: '조금 아쉬웠어요.'),
+      ProductReview(userName: '김영희', content: '잘 사용하고 있어요.'),
+      ProductReview(userName: '최수정', content: '운동 후에 먹기 좋아요.'),
+      ProductReview(userName: '이민호', content: '운동 후에 먹기 좋아요.'),
+    ],
   ),
   Product(
     id: '4',
@@ -69,6 +91,7 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [ProductReview(userName: '안유진', content: '배송이 빨랐어요.')],
   ),
   Product(
     id: '5',
@@ -99,6 +122,10 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '조세호', content: '다음에 또 구매할게요.'),
+      ProductReview(userName: '이민호', content: '정말 만족합니다!'),
+    ],
   ),
   Product(
     id: '7',
@@ -114,6 +141,10 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '조세호', content: '다음에 또 구매할게요.'),
+      ProductReview(userName: '이민호', content: '정말 만족합니다!'),
+    ],
   ),
   Product(
     id: '8',
@@ -129,6 +160,10 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '조세호', content: '다음에 또 구매할게요.'),
+      ProductReview(userName: '이민호', content: '정말 만족합니다!'),
+    ],
   ),
 
   // --- 운동보조제
@@ -146,6 +181,10 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '조세호', content: '다음에 또 구매할게요.'),
+      ProductReview(userName: '이민호', content: '정말 만족합니다!'),
+    ],
   ),
   Product(
     id: '10',
@@ -161,6 +200,12 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '안유진', content: '조금 아쉬웠어요.'),
+      ProductReview(userName: '김영희', content: '잘 사용하고 있어요.'),
+      ProductReview(userName: '최수정', content: '운동 후에 먹기 좋아요.'),
+      ProductReview(userName: '이민호', content: '운동 후에 먹기 좋아요.'),
+    ],
   ),
   Product(
     id: '11',
@@ -176,6 +221,10 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '조세호', content: '다음에 또 구매할게요.'),
+      ProductReview(userName: '이민호', content: '정말 만족합니다!'),
+    ],
   ),
   Product(
     id: '12',
@@ -191,6 +240,10 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '조세호', content: '다음에 또 구매할게요.'),
+      ProductReview(userName: '이민호', content: '정말 만족합니다!'),
+    ],
   ),
   Product(
     id: '13',
@@ -206,6 +259,12 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '안유진', content: '조금 아쉬웠어요.'),
+      ProductReview(userName: '김영희', content: '잘 사용하고 있어요.'),
+      ProductReview(userName: '최수정', content: '운동 후에 먹기 좋아요.'),
+      ProductReview(userName: '이민호', content: '운동 후에 먹기 좋아요.'),
+    ],
   ),
   Product(
     id: '14',
@@ -221,6 +280,12 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '안유진', content: '조금 아쉬웠어요.'),
+      ProductReview(userName: '김영희', content: '잘 사용하고 있어요.'),
+      ProductReview(userName: '최수정', content: '운동 후에 먹기 좋아요.'),
+      ProductReview(userName: '이민호', content: '운동 후에 먹기 좋아요.'),
+    ],
   ),
   Product(
     id: '15',
@@ -236,6 +301,10 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '조세호', content: '다음에 또 구매할게요.'),
+      ProductReview(userName: '이민호', content: '정말 만족합니다!'),
+    ],
   ),
   Product(
     id: '16',
@@ -251,6 +320,10 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '조세호', content: '다음에 또 구매할게요.'),
+      ProductReview(userName: '이민호', content: '정말 만족합니다!'),
+    ],
   ),
 
   // --- 운동용품
@@ -268,6 +341,13 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '장원영', content: '가격 대비 최고입니다.'),
+      ProductReview(userName: '조세호', content: '디자인이 예뻐요.'),
+      ProductReview(userName: '아이유', content: '재구매 의사 있어요.'),
+      ProductReview(userName: '최수정', content: '품질이 생각보다 좋네요.'),
+      ProductReview(userName: '이민호', content: '잘 사용하고 있어요.'),
+    ],
   ),
   Product(
     id: '18',
@@ -283,6 +363,18 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '장원영', content: '가격 대비 최고입니다.'),
+      ProductReview(userName: '조세호', content: '디자인이 예뻐요.'),
+      ProductReview(userName: '아이유', content: '재구매 의사 있어요.'),
+      ProductReview(userName: '최수정', content: '품질이 생각보다 좋네요.'),
+      ProductReview(userName: '이민호', content: '잘 사용하고 있어요.'),
+      ProductReview(userName: '장원영', content: '가격 대비 최고입니다.'),
+      ProductReview(userName: '조세호', content: '디자인이 예뻐요.'),
+      ProductReview(userName: '아이유', content: '재구매 의사 있어요.'),
+      ProductReview(userName: '최수정', content: '품질이 생각보다 좋네요.'),
+      ProductReview(userName: '이민호', content: '잘 사용하고 있어요.'),
+    ],
   ),
   Product(
     id: '19',
@@ -298,6 +390,13 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '장원영', content: '가격 대비 최고입니다.'),
+      ProductReview(userName: '조세호', content: '디자인이 예뻐요.'),
+      ProductReview(userName: '아이유', content: '재구매 의사 있어요.'),
+      ProductReview(userName: '최수정', content: '품질이 생각보다 좋네요.'),
+      ProductReview(userName: '이민호', content: '잘 사용하고 있어요.'),
+    ],
   ),
   Product(
     id: '20',
@@ -313,6 +412,11 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '정국', content: '품질이 생각보다 좋네요.'),
+      ProductReview(userName: '최수정', content: '디자인이 예뻐요.'),
+      ProductReview(userName: '정국', content: '잘 사용하고 있어요.'),
+    ],
   ),
   Product(
     id: '21',
@@ -328,6 +432,11 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '정국', content: '품질이 생각보다 좋네요.'),
+      ProductReview(userName: '최수정', content: '디자인이 예뻐요.'),
+      ProductReview(userName: '정국', content: '잘 사용하고 있어요.'),
+    ],
   ),
   Product(
     id: '22',
@@ -343,6 +452,11 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '정국', content: '품질이 생각보다 좋네요.'),
+      ProductReview(userName: '최수정', content: '디자인이 예뻐요.'),
+      ProductReview(userName: '정국', content: '잘 사용하고 있어요.'),
+    ],
   ),
 
   // --- 헬스웨어
@@ -360,6 +474,11 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '정국', content: '품질이 생각보다 좋네요.'),
+      ProductReview(userName: '최수정', content: '디자인이 예뻐요.'),
+      ProductReview(userName: '정국', content: '잘 사용하고 있어요.'),
+    ],
   ),
   Product(
     id: '24',
@@ -375,6 +494,11 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '정국', content: '품질이 생각보다 좋네요.'),
+      ProductReview(userName: '최수정', content: '디자인이 예뻐요.'),
+      ProductReview(userName: '정국', content: '잘 사용하고 있어요.'),
+    ],
   ),
   Product(
     id: '25',
@@ -390,6 +514,11 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '정국', content: '품질이 생각보다 좋네요.'),
+      ProductReview(userName: '최수정', content: '디자인이 예뻐요.'),
+      ProductReview(userName: '정국', content: '잘 사용하고 있어요.'),
+    ],
   ),
   Product(
     id: '26',
@@ -405,6 +534,11 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '정국', content: '품질이 생각보다 좋네요.'),
+      ProductReview(userName: '최수정', content: '디자인이 예뻐요.'),
+      ProductReview(userName: '정국', content: '잘 사용하고 있어요.'),
+    ],
   ),
   Product(
     id: '27',
@@ -420,6 +554,7 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [ProductReview(userName: '안유진', content: '배송이 빨랐어요.')],
   ),
   Product(
     id: '28',
@@ -435,6 +570,7 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [ProductReview(userName: '안유진', content: '배송이 빨랐어요.')],
   ),
   Product(
     id: '29',
@@ -450,6 +586,7 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [ProductReview(userName: '안유진', content: '배송이 빨랐어요.')],
   ),
   Product(
     id: '30',
@@ -465,6 +602,7 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [ProductReview(userName: '안유진', content: '배송이 빨랐어요.')],
   ),
   Product(
     id: '31',
@@ -480,6 +618,11 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '정국', content: '품질이 생각보다 좋네요.'),
+      ProductReview(userName: '최수정', content: '디자인이 예뻐요.'),
+      ProductReview(userName: '정국', content: '잘 사용하고 있어요.'),
+    ],
   ),
   Product(
     id: '32',
@@ -495,6 +638,11 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 3000,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '정국', content: '품질이 생각보다 좋네요.'),
+      ProductReview(userName: '최수정', content: '디자인이 예뻐요.'),
+      ProductReview(userName: '정국', content: '잘 사용하고 있어요.'),
+    ],
   ),
 
   // --- 서비스
@@ -512,6 +660,11 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 0,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '정국', content: '품질이 생각보다 좋네요.'),
+      ProductReview(userName: '최수정', content: '디자인이 예뻐요.'),
+      ProductReview(userName: '정국', content: '잘 사용하고 있어요.'),
+    ],
   ),
   Product(
     id: '34',
@@ -527,6 +680,11 @@ List<Product> allProducts = [
     shippingInfo: 'CJ대한통운',
     shippingFee: 0,
     isLiked: false,
+    reviewList: [
+      ProductReview(userName: '정국', content: '품질이 생각보다 좋네요.'),
+      ProductReview(userName: '최수정', content: '디자인이 예뻐요.'),
+      ProductReview(userName: '정국', content: '잘 사용하고 있어요.'),
+    ],
   ),
 ];
 

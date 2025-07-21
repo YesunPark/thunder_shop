@@ -19,7 +19,6 @@ class ProductDetailPage extends StatefulWidget {
 class _ProductDetailPageState extends State<ProductDetailPage> {
   int _currentIndex = 0;
   int _reviewCount = 0; // ✅ 리뷰 개수 상태
-  bool _showInquiryForm = false;
 
   List<String> get imageList {
     return widget.product.imageUrls.isNotEmpty
