@@ -276,10 +276,7 @@ class CartItemCard extends StatelessWidget {
                 height: 80,
                 color: Colors.grey[300],
                 child: item.product.mainImageUrl.isNotEmpty
-                    ? Image.network(
-                        item.product.mainImageUrl,
-                        fit: BoxFit.cover,
-                      )
+                    ? Image.asset(item.product.mainImageUrl, fit: BoxFit.cover)
                     : Icon(Icons.image, size: 40, color: Colors.grey[500]),
               ),
             ),

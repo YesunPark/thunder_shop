@@ -4,6 +4,9 @@ import 'widgets/product_image_slider.dart';
 import 'widgets/product_price_info.dart';
 import 'widgets/purchase_bottom_sheet.dart';
 import 'package:thunder_shop/model/favorite_button.dart';
+import 'widgets/product_review.dart';
+import 'widgets/product_inquiry.dart';
+import 'package:thunder_shop/style/common_colors.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final Product product;
@@ -16,6 +19,10 @@ class ProductDetailPage extends StatefulWidget {
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
   int _currentIndex = 0;
+  int _reviewCount = 0;
+
+  bool _showReviewForm = false;
+  bool _showInquiryForm = false;
 
   List<String> get imageList {
     return widget.product.imageUrls.isNotEmpty
@@ -25,7 +32,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   void toggleFavorite() {
     setState(() {
-      widget.product.isLiked = !widget.product.isLiked; // ✅ 찜 상태 토글
+      widget.product.isLiked = !widget.product.isLiked;
     });
   }
 
@@ -74,19 +81,18 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             },
           ),
           const SizedBox(height: 16),
-
           Text(
             product.productName,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-
           ProductPriceInfo(
             originalPrice: product.price,
             salePrice: product.discountPrice,
           ),
           const SizedBox(height: 24),
 
+          // 배송 정보
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -122,26 +128,52 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           ),
           const SizedBox(height: 24),
 
+          // 🔽 후기 영역
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              Text('상품 후기', style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('총 2개'),
+            children: [
+              const Text(
+                '상품 후기',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text('총 $_reviewCount개'),
             ],
           ),
           const SizedBox(height: 12),
-          const Text('이름1', style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
-          const Text('맛이 부드럽고 양도 넉넉해요'),
-          const SizedBox(height: 12),
-          const Text('이름2', style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
-          const Text('배송도 빠르고 만족해요'),
-          const SizedBox(height: 12),
-          GestureDetector(
-            onTap: () {},
-            child: const Text('상품 문의 >', style: TextStyle(color: Colors.blue)),
+          ProductReview(
+            onReviewCountChanged: (count) {
+              setState(() {
+                _reviewCount = count;
+              });
+            },
+            showForm: _showReviewForm, // ✅ 폼 표시 여부 전달
           ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () {
+                setState(() => _showReviewForm = !_showReviewForm);
+              },
+              child: Text(_showReviewForm ? '리뷰 작성 취소' : '리뷰 쓰기'),
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // 🔽 문의 영역
+          const Text('상품 문의', style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          ProductInquiry(showForm: _showInquiryForm), // ✅ 폼 표시 여부 전달
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () {
+                setState(() => _showInquiryForm = !_showInquiryForm);
+              },
+              child: Text(_showInquiryForm ? '문의 작성 취소' : '문의하기'),
+            ),
+          ),
+
           const SizedBox(height: 80),
         ],
       ),
@@ -168,7 +200,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   child: ElevatedButton(
                     onPressed: () => showPurchaseSheet(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
+                      backgroundColor: CommonColors.primary,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
