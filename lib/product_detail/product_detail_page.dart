@@ -1,14 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:thunder_shop/model/cart_item.dart';
 import '../model/product.dart';
 import 'widgets/product_image_slider.dart';
 import 'widgets/product_price_info.dart';
 import 'widgets/purchase_bottom_sheet.dart';
+import 'widgets/product_review.dart'; // ✅ 수정된 리뷰 표시용 위젯
 import 'package:thunder_shop/model/favorite_button.dart';
+import 'package:thunder_shop/style/common_colors.dart';
+import 'package:thunder_shop/cart/cart_page.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final Product product;
+  final List<CartItem> cartItems;
+  final void Function(Product) onAddToCart;
 
-  const ProductDetailPage({super.key, required this.product});
+  const ProductDetailPage({
+    super.key,
+    required this.product,
+    required this.cartItems,
+    required this.onAddToCart,
+  });
 
   @override
   State<ProductDetailPage> createState() => _ProductDetailPageState();
@@ -16,6 +27,8 @@ class ProductDetailPage extends StatefulWidget {
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
   int _currentIndex = 0;
+  int _reviewCount = 0; // ✅ 리뷰 개수 상태
+  bool _showInquiryForm = false;
 
   List<String> get imageList {
     return widget.product.imageUrls.isNotEmpty
@@ -25,7 +38,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   void toggleFavorite() {
     setState(() {
-      widget.product.isLiked = !widget.product.isLiked; // ✅ 찜 상태 토글
+      widget.product.isLiked = !widget.product.isLiked;
     });
   }
 
@@ -45,6 +58,17 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     );
   }
 
+  // 장바구니 담기 로직
+  void _addToCart(BuildContext context) {
+    widget.onAddToCart(widget.product);
+  }
+
+  void _updateReviewCount(int count) {
+    setState(() {
+      _reviewCount = count;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final product = widget.product;
@@ -57,8 +81,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.pushNamed(context, '/cart');
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CartPage(cartItems: widget.cartItems),
+                ),
+              );
             },
+            // 장바구니 아이콘
             icon: const Icon(Icons.shopping_cart_outlined),
           ),
         ],
@@ -74,19 +104,18 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             },
           ),
           const SizedBox(height: 16),
-
           Text(
             product.productName,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-
           ProductPriceInfo(
             originalPrice: product.price,
             salePrice: product.discountPrice,
           ),
           const SizedBox(height: 24),
 
+          // 배송 정보
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -122,27 +151,39 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           ),
           const SizedBox(height: 24),
 
+          // 🔽 후기 영역
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              Text('상품 후기', style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('총 2개'),
+            children: [
+              const Text(
+                '상품 후기',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text('총 $_reviewCount개'),
             ],
           ),
           const SizedBox(height: 12),
-          const Text('이름1', style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
-          const Text('맛이 부드럽고 양도 넉넉해요'),
-          const SizedBox(height: 12),
-          const Text('이름2', style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
-          const Text('배송도 빠르고 만족해요'),
-          const SizedBox(height: 12),
-          GestureDetector(
-            onTap: () {},
-            child: const Text('상품 문의 >', style: TextStyle(color: Colors.blue)),
+          ProductReviewSection(
+            reviews: product.reviewList,
+            onReviewCountChanged: _updateReviewCount, // ✅ 개수 반영 콜백
           ),
-          const SizedBox(height: 80),
+
+          const SizedBox(height: 24),
+
+          // 🔽 문의 영역
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '상품 문의 >',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
         ],
       ),
       bottomNavigationBar: BottomAppBar(
@@ -151,15 +192,15 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           child: Row(
             children: [
               FavoriteButton(
-                isFavorite: widget.product.isLiked,
+                isFavorite: product.isLiked,
                 onToggle: toggleFavorite,
                 size: 30,
                 activeColor: Colors.pink,
                 inactiveColor: Colors.black,
               ),
               IconButton(
-                icon: const Icon(Icons.add_shopping_cart_outlined),
-                onPressed: () => showPurchaseSheet(context),
+                icon: const Icon(Icons.add_shopping_cart_outlined, size: 30),
+                onPressed: () => _addToCart(context),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -168,7 +209,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   child: ElevatedButton(
                     onPressed: () => showPurchaseSheet(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
+                      backgroundColor: CommonColors.primary,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),

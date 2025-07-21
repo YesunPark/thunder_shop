@@ -44,6 +44,14 @@ class _CartPageState extends State<CartPage> {
       .where((item) => item.selected)
       .fold(0, (sum, item) => sum + item.quantity);
 
+  @override
+  void initState() {
+    super.initState();
+    for (var item in cartItems) {
+      item.selected = true;
+    }
+  }
+
   void toggleAll(bool? value) {
     setState(() {
       for (var item in cartItems) {
@@ -137,7 +145,12 @@ class _CartPageState extends State<CartPage> {
               ),
               child: Row(
                 children: [
-                  Checkbox(value: allSelected, onChanged: toggleAll),
+                  Checkbox(
+                    value: allSelected,
+                    onChanged: toggleAll,
+                    activeColor: CommonColors.primary,
+                    checkColor: Colors.white,
+                  ),
                   Text('모두 선택'),
                   SizedBox(width: 12),
                   Expanded(
@@ -146,7 +159,7 @@ class _CartPageState extends State<CartPage> {
                         backgroundColor: CommonColors.primary,
                         foregroundColor: Colors.black87,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         padding: EdgeInsets.symmetric(vertical: 16),
                       ),
@@ -196,7 +209,7 @@ class EmptyCart extends StatelessWidget {
                 backgroundColor: CommonColors.primary,
                 foregroundColor: Colors.black87,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 elevation: 0,
               ),
@@ -239,6 +252,8 @@ class CartItemCard extends StatelessWidget {
     return Card(
       margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+      elevation: 0.5,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 5),
         child: Row(
@@ -250,6 +265,8 @@ class CartItemCard extends StatelessWidget {
                 value: item.selected,
                 onChanged: onSelect,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                activeColor: CommonColors.primary,
+                checkColor: Colors.white,
               ),
             ),
             ClipRRect(
@@ -259,10 +276,7 @@ class CartItemCard extends StatelessWidget {
                 height: 80,
                 color: Colors.grey[300],
                 child: item.product.mainImageUrl.isNotEmpty
-                    ? Image.network(
-                        item.product.mainImageUrl,
-                        fit: BoxFit.cover,
-                      )
+                    ? Image.asset(item.product.mainImageUrl, fit: BoxFit.cover)
                     : Icon(Icons.image, size: 40, color: Colors.grey[500]),
               ),
             ),
@@ -414,12 +428,12 @@ class TotalPriceInfo extends StatelessWidget {
           SizedBox(height: 4),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [Text('총 배송비'), Text('+${totalShippingFee} 원')],
+            children: [Text('총 배송비'), Text('+ ${totalShippingFee} 원')],
           ),
           SizedBox(height: 4),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [Text('총 할인 금액'), Text('-${totalDiscount} 원')],
+            children: [Text('총 할인 금액'), Text('- ${totalDiscount} 원')],
           ),
           SizedBox(height: 8),
           Row(
