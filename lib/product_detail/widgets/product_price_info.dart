@@ -14,21 +14,20 @@ class ProductPriceInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     final discount = (100 - salePrice / originalPrice * 100).round();
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        Text(
+          '$originalPrice원',
+          style: const TextStyle(
+            color: Colors.grey,
+            decoration: TextDecoration.lineThrough,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Row(
           children: [
-            Text(
-              '$originalPrice원',
-              style: const TextStyle(
-                color: Colors.grey,
-                decoration: TextDecoration.lineThrough,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 2),
             Text(
               '$salePrice원',
               style: const TextStyle(
@@ -37,15 +36,16 @@ class ProductPriceInfo extends StatelessWidget {
                 fontSize: 18,
               ),
             ),
+            const SizedBox(width: 8),
+            Text(
+              '-$discount%',
+              style: const TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
           ],
-        ),
-        Text(
-          '-$discount%',
-          style: const TextStyle(
-            color: Colors.red,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
         ),
       ],
     );
