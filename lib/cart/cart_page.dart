@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thunder_shop/model/cart_item.dart';
+import 'package:thunder_shop/style/common_colors.dart';
 
 class CartPage extends StatefulWidget {
   final List<CartItem> cartItems;
@@ -142,7 +143,7 @@ class _CartPageState extends State<CartPage> {
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 80, 115, 255),
+                        backgroundColor: CommonColors.primary,
                         foregroundColor: Colors.black87,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -192,7 +193,7 @@ class EmptyCart extends StatelessWidget {
             height: 40,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 80, 115, 255),
+                backgroundColor: CommonColors.primary,
                 foregroundColor: Colors.black87,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
