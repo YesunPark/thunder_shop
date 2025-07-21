@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:thunder_shop/model/product.dart';
+import 'package:thunder_shop/model/cart_item.dart';
+
 import 'package:thunder_shop/product_register/product_register_page.dart';
 import '../cart/cart_page.dart';
 

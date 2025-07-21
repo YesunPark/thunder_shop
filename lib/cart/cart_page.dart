@@ -1,12 +1,5 @@
 import 'package:flutter/material.dart';
-import '../model/product.dart';
-
-class CartItem {
-  final Product product;
-  int quantity;
-  bool selected;
-  CartItem({required this.product, this.quantity = 1, this.selected = false});
-}
+import 'package:thunder_shop/model/cart_item.dart';
 
 class CartPage extends StatefulWidget {
   final List<CartItem> cartItems;
