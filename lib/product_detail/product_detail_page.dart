@@ -15,6 +15,7 @@ class ProductDetailPage extends StatefulWidget {
   final List<CartItem> cartItems;
   final void Function(Product, int) onAddToCart;
   final bool isPreview;
+  final int shippingFee;
 
   const ProductDetailPage({
     super.key,
@@ -22,6 +23,7 @@ class ProductDetailPage extends StatefulWidget {
     required this.cartItems,
     required this.onAddToCart,
     this.isPreview = false,
+    required this.shippingFee,
   });
 
   @override
@@ -67,6 +69,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         salePrice: widget.product.discountPrice,
         imageUrl: imageList[0],
         onAddToCart: widget.onAddToCart,
+        shippingFee: widget.product.shippingFee, // 배송비 추가
       ),
     );
   }
