@@ -8,6 +8,7 @@ import '../product_detail/product_detail_page.dart';
 
 import 'widgets/category_selector.dart';
 import 'widgets/product_item.dart';
+import 'package:thunder_shop/style/common_colors.dart';
 
 // ------- 샘플 상품 데이터 --------
 List<Product> allProducts = [
@@ -754,28 +755,66 @@ class _ProductListPageState extends State<ProductListPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        backgroundColor: Colors.white,
+        elevation: 0,
         title: Stack(
           alignment: Alignment.center,
           children: [
-            const Text('상품 목록'),
+            // 중앙에 Thunder 로고
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(Icons.fitness_center, color: Colors.teal),
+                SizedBox(width: 4),
+                Text(
+                  'Thunder',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black,
+                    fontFamily: 'SpaceMono',
+                  ),
+                ),
+              ],
+            ),
+
+            // 좌측 상품 등록 버튼 + 우측 장바구니
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextButton.icon(
                   onPressed: goToRegisterPage,
-                  icon: Icon(Icons.add_box, color: Colors.black),
-                  label: Text('상품 등록', style: TextStyle(color: Colors.black)),
+                  style: TextButton.styleFrom(
+                    backgroundColor: CommonColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                  icon: const Icon(
+                    Icons.add_box_outlined,
+                    size: 18,
+                    color: Colors.white,
+                  ),
+                  label: const Text('상품 등록', style: TextStyle(fontSize: 13)),
                 ),
-
                 IconButton(
                   onPressed: goToCartPage,
-                  icon: const Icon(Icons.shopping_cart_outlined),
+                  icon: const Icon(
+                    Icons.shopping_cart_outlined,
+                    color: Colors.black,
+                  ),
                 ),
               ],
             ),
           ],
         ),
       ),
+
       body: Column(
         children: [
           CategorySelector(

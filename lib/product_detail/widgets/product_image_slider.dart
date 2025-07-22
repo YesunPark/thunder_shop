@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 
 class ProductImageSlider extends StatelessWidget {
@@ -22,8 +23,9 @@ class ProductImageSlider extends StatelessWidget {
             itemCount: imageList.length,
             onPageChanged: onPageChanged,
             itemBuilder: (context, index) {
-              return Image.network(
-                imageList[index],
+              final path = imageList[index];
+              return Image.file(
+                File(path),
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(

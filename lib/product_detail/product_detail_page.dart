@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:thunder_shop/model/cart_item.dart';
 import '../model/product.dart';
@@ -13,12 +15,14 @@ class ProductDetailPage extends StatefulWidget {
   final Product product;
   final List<CartItem> cartItems;
   final void Function(Product) onAddToCart;
+  final bool isPreview;
 
   const ProductDetailPage({
     super.key,
     required this.product,
     required this.cartItems,
     required this.onAddToCart,
+    this.isPreview = false,
   });
 
   @override
@@ -30,9 +34,22 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   int _reviewCount = 0; // ✅ 리뷰 개수 상태
 
   List<String> get imageList {
-    return widget.product.imageUrls.isNotEmpty
-        ? widget.product.imageUrls
-        : ['https://picsum.photos/seed/${widget.product.id}/300/250'];
+    final List<String> images = [];
+
+    // 대표 이미지가 있으면 가장 앞에 추가
+    if (widget.product.mainImageUrl.isNotEmpty) {
+      images.add(widget.product.mainImageUrl);
+    }
+
+    // 추가 이미지들도 포함
+    images.addAll(widget.product.imageUrls);
+
+    // 아무것도 없을 경우 기본 이미지
+    if (images.isEmpty) {
+      images.add('https://picsum.photos/seed/${widget.product.id}/300/250');
+    }
+
+    return images;
   }
 
   void toggleFavorite() {
@@ -79,16 +96,20 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         leading: const BackButton(),
         actions: [
           IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => CartPage(cartItems: widget.cartItems),
-                ),
-              );
-            },
-            // 장바구니 아이콘
-            icon: const Icon(Icons.shopping_cart_outlined),
+            onPressed: widget.isPreview
+                ? null
+                : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CartPage(cartItems: widget.cartItems),
+                      ),
+                    );
+                  },
+            icon: Icon(
+              Icons.shopping_cart_outlined,
+              color: widget.isPreview ? Colors.grey[300] : Colors.white,
+            ),
           ),
         ],
       ),
@@ -138,15 +159,17 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             ],
           ),
           const SizedBox(height: 24),
-
           const Text('상품 세부정보', style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          Container(
-            height: 150,
+          SizedBox(
+            height: 200,
             width: double.infinity,
-            color: Colors.grey[200],
-            alignment: Alignment.center,
-            child: const Text('이미지'),
+            child: Image.file(
+              File(widget.product.descImageUrl),
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) =>
+                  const Center(child: Icon(Icons.broken_image)),
+            ),
           ),
           const SizedBox(height: 24),
 
@@ -192,29 +215,53 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             children: [
               FavoriteButton(
                 isFavorite: product.isLiked,
-                onToggle: toggleFavorite,
+                onToggle: () {
+                  if (!widget.isPreview) {
+                    toggleFavorite();
+                  }
+                },
                 size: 30,
-                activeColor: Colors.pink,
-                inactiveColor: Colors.black,
+                activeColor: widget.isPreview ? Colors.grey[300]! : Colors.pink,
+                inactiveColor: widget.isPreview
+                    ? Colors.grey[300]!
+                    : Colors.black,
               ),
               IconButton(
-                icon: const Icon(Icons.add_shopping_cart_outlined, size: 30),
-                onPressed: () => _addToCart(context),
+                icon: Icon(
+                  Icons.add_shopping_cart_outlined,
+                  size: 30,
+                  color: widget.isPreview ? Colors.grey[300] : Colors.black,
+                ),
+                onPressed: widget.isPreview ? null : () => _addToCart(context),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: SizedBox(
                   height: 48,
                   child: ElevatedButton(
-                    onPressed: () => showPurchaseSheet(context),
+                    onPressed: widget.isPreview
+                        ? null
+                        : () => showPurchaseSheet(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: CommonColors.primary,
-                      foregroundColor: Colors.white,
+                      backgroundColor: widget.isPreview
+                          ? Colors.grey[300]
+                          : CommonColors.primary,
+                      foregroundColor: widget.isPreview
+                          ? Colors.grey[500]
+                          : Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),
                     ),
-                    child: const Text('구매하기', style: TextStyle(fontSize: 16)),
+                    child: Text(
+                      '구매하기',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: widget.isPreview
+                            ? Colors.grey[500]
+                            : Colors.white,
+                      ),
+                    ),
                   ),
                 ),
               ),
