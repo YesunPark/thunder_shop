@@ -4,6 +4,7 @@ import 'package:thunder_shop/model/cart_item.dart';
 import 'package:thunder_shop/model/product.dart';
 import 'package:thunder_shop/product_detail/product_detail_page.dart';
 import 'package:thunder_shop/style/common_colors.dart';
+import 'package:thunder_shop/util/number_format_util.dart';
 
 class ProductItem extends StatefulWidget {
   final Product product;
@@ -51,10 +52,6 @@ class _ProductItemState extends State<ProductItem> {
     });
   }
 
-  String formatPrice(int price) {
-    return NumberFormat('#,###').format(price);
-  }
-
   int? calcDiscountPercent(int price, int discountPrice) {
     if (price > 0 && discountPrice > 0 && discountPrice < price) {
       return ((100 * (price - discountPrice) / price).round());
@@ -84,7 +81,7 @@ class _ProductItemState extends State<ProductItem> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${formatPrice(widget.product.price)}원',
+                  '${formatWithComma(widget.product.price)}원',
                   style: const TextStyle(
                     decoration: TextDecoration.lineThrough,
                     color: Colors.grey,
@@ -107,7 +104,7 @@ class _ProductItemState extends State<ProductItem> {
                         ),
                       ),
                     Text(
-                      '${formatPrice(widget.product.discountPrice!)}원',
+                      '${formatWithComma(widget.product.discountPrice!)}원',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
@@ -119,7 +116,7 @@ class _ProductItemState extends State<ProductItem> {
               ],
             );
           } else {
-            return Text('${formatPrice(widget.product.price)}원');
+            return Text('${formatWithComma(widget.product.price)}원');
           }
         }
 
