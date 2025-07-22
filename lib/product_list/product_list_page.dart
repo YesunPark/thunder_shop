@@ -792,7 +792,7 @@ class _ProductListPageState extends State<ProductListPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TextButton.icon(
+                TextButton(
                   onPressed: goToRegisterPage,
                   style: TextButton.styleFrom(
                     backgroundColor: CommonColors.primary,
@@ -805,9 +805,9 @@ class _ProductListPageState extends State<ProductListPage> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                   ),
-                  label: const Text('상품 등록', style: TextStyle(fontSize: 13)),
-                  icon: const Icon(Icons.add, size: 16),
+                  child: const Text('상품 등록', style: TextStyle(fontSize: 13)),
                 ),
+
                 IconButton(
                   onPressed: goToCartPage,
                   icon: const Icon(
