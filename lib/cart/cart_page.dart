@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thunder_shop/model/cart_item.dart';
+import 'package:thunder_shop/product_list/product_list_page.dart';
 import 'package:thunder_shop/util/number_format_util.dart';
 import 'package:thunder_shop/style/common_colors.dart';
 
@@ -20,7 +21,7 @@ class _CartPageState extends State<CartPage> {
   // 상품 원가 총합 금액
   int get totalProductPrice => cartItems
       .where((item) => item.selected)
-      .fold(0, (sum, item) => sum + item.product.discountPrice * item.quantity);
+      .fold(0, (sum, item) => sum + item.product.price * item.quantity);
 
   // 총 배송비 금액
   int get totalShippingFee => cartItems
@@ -28,17 +29,20 @@ class _CartPageState extends State<CartPage> {
       .fold(0, (sum, item) => sum + item.product.shippingFee);
 
   // 총 할인된 금액
-  int get totalDiscount => cartItems
-      .where((item) => item.selected)
-      .fold(
-        0,
-        (sum, item) =>
-            sum +
-            (item.product.price - item.product.discountPrice) * item.quantity,
-      );
+  int get totalDiscount => cartItems.where((item) => item.selected).fold(0, (
+    sum,
+    item,
+  ) {
+    // discountPrice가 0이면 원가(price)로 대체
+    final effectiveDiscountPrice = item.product.discountPrice == 0
+        ? item.product.price
+        : item.product.discountPrice;
+    // (원가 - 할인된 가격) * 수량
+    return sum + (item.product.price - effectiveDiscountPrice) * item.quantity;
+  });
 
   // 총 결제 금액
-  int get totalPay => totalProductPrice + totalShippingFee;
+  int get totalPay => totalProductPrice - totalDiscount + totalShippingFee;
 
   // 선택된 상품 개수
   int get totalCount => cartItems
@@ -164,7 +168,11 @@ class _CartPageState extends State<CartPage> {
                         ),
                         padding: EdgeInsets.symmetric(vertical: 16),
                       ),
-                      onPressed: totalCount > 0 ? () {} : null,
+                      onPressed: totalCount > 0
+                          ? () {
+                              _showPaymentDialog();
+                            }
+                          : null,
                       child: Text(
                         '총 ${totalCount}개 상품 ${formatWithComma(totalPay)}원 구매하기',
                       ),
@@ -173,6 +181,45 @@ class _CartPageState extends State<CartPage> {
                 ],
               ),
             ),
+    );
+  }
+
+  // 구매완료 팝업 표시
+  void _showPaymentDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        contentPadding: const EdgeInsets.fromLTRB(24, 30, 0, 10),
+        content: Text(
+          '총 ${formatWithComma(totalPay)}원 결제되었습니다.',
+          style: TextStyle(fontSize: 16),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.grey.shade300),
+        ),
+        // actions 영역의 패딩 (버튼과 테두리 간격)
+        actionsPadding: const EdgeInsets.only(right: 16, bottom: 8),
+        actions: [
+          TextButton(
+            style: ButtonStyle(
+              // 눌렀을 때 보라색 대신 회색 오버레이
+              overlayColor: MaterialStateProperty.all(Colors.grey.shade200),
+            ),
+            onPressed: () {
+              // 다이얼로그 닫기
+              Navigator.of(context).pop();
+
+              // 상품 목록으로 이동
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => ProductListPage()),
+              );
+            },
+            child: Text('확인', style: TextStyle(color: Colors.black)),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -339,19 +386,22 @@ class CartItemCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             // 원가
-                            Text(
-                              '${formatWithComma(item.product.price)}원',
-                              textAlign: TextAlign.right,
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.grey,
-                                decoration: TextDecoration.lineThrough,
+                            if (item.product.discountPrice != 0) ...[
+                              Text(
+                                '${formatWithComma(item.product.price)}원',
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.grey,
+                                  decoration: TextDecoration.lineThrough,
+                                ),
                               ),
-                            ),
-                            SizedBox(height: 3),
-                            // 할인가
+                              SizedBox(height: 3),
+                            ],
+
+                            // 할인가(판매가)
                             Text(
-                              '${formatWithComma(item.product.discountPrice)}원',
+                              '${formatWithComma(item.product.discountPrice != 0 ? item.product.discountPrice : item.product.price)}원',
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 fontSize: 16,
