@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // 콤마(,) 처리를 위한 패키지 추가!
 import 'package:image_picker/image_picker.dart';
 import 'package:thunder_shop/model/product.dart';
 import 'package:thunder_shop/product_detail/product_detail_page.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
 
 class ProductRegisterPage extends StatefulWidget {
   final int lastId;
@@ -26,8 +26,7 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
   String? _selectedSubCategory;
   String? _mainImageUrl;
   String? _descImageUrl;
-  String? _videoUrl;
-  String? _videoThumbnailPath;
+  String? _videoUrl; // 삭제하지 않음
   List<String> _imageUrls = [];
   bool _isPicking = false;
   double? _discountPercent;
@@ -48,11 +47,35 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
     super.initState();
     _priceController.addListener(_onPriceOrDiscountChanged);
     _discountPriceController.addListener(_onPriceOrDiscountChanged);
+    // 아래: 입력값에 콤마 자동 처리
+    _priceController.addListener(() => _onCommaEdit(_priceController));
+    _discountPriceController.addListener(
+      () => _onCommaEdit(_discountPriceController),
+    );
+    _shippingFeeController.addListener(
+      () => _onCommaEdit(_shippingFeeController),
+    );
+  }
+
+  // 콤마(,) 자동 변환
+  void _onCommaEdit(TextEditingController controller) {
+    String text = controller.text.replaceAll(',', '');
+    if (text.isEmpty) return;
+    final number = int.tryParse(text);
+    if (number == null) return;
+    final newText = NumberFormat('#,###').format(number);
+    if (controller.text != newText) {
+      controller.value = TextEditingValue(
+        text: newText,
+        selection: TextSelection.collapsed(offset: newText.length),
+      );
+    }
   }
 
   void _onPriceOrDiscountChanged() {
-    final price = int.tryParse(_priceController.text) ?? 0;
-    final discount = int.tryParse(_discountPriceController.text) ?? 0;
+    final price = int.tryParse(_priceController.text.replaceAll(',', '')) ?? 0;
+    final discount =
+        int.tryParse(_discountPriceController.text.replaceAll(',', '')) ?? 0;
     if (price > 0 && discount > 0 && discount < price) {
       setState(() {
         _discountPercent = 100 * (price - discount) / price;
@@ -140,35 +163,6 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
     }
   }
 
-  Future<void> _pickVideo() async {
-    if (_isPicking) return;
-    _isPicking = true;
-    try {
-      final XFile? video = await _picker.pickVideo(source: ImageSource.gallery);
-      if (video != null) {
-        setState(() {
-          _videoUrl = video.path;
-          _videoThumbnailPath = null;
-        });
-        final String? thumb = await VideoThumbnail.thumbnailFile(
-          video: video.path,
-          imageFormat: ImageFormat.PNG,
-          maxWidth: 180,
-          quality: 75,
-        );
-        if (thumb != null) {
-          setState(() => _videoThumbnailPath = thumb);
-        }
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('동영상 선택 중 오류가 발생했습니다: $e')));
-    } finally {
-      _isPicking = false;
-    }
-  }
-
   void _registerProduct() async {
     if (_formKey.currentState?.validate() != true) return;
     if (_mainImageUrl == null) {
@@ -196,19 +190,21 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
       ).showSnackBar(const SnackBar(content: Text('배송비를 입력해주세요.')));
       return;
     }
-    int price = int.tryParse(_priceController.text) ?? 0;
-    int discountPrice = int.tryParse(_discountPriceController.text) ?? 0;
-    if (_discountPriceController.text.trim().isEmpty) {
-      discountPrice = price;
+    int price = int.tryParse(_priceController.text.replaceAll(',', '')) ?? 0;
+    int discountPrice = 0;
+    if (_discountPriceController.text.trim().isNotEmpty) {
+      discountPrice =
+          int.tryParse(_discountPriceController.text.replaceAll(',', '')) ?? 0;
     }
+    // 3번: 할인가 미입력 시 0으로 전송
     if (discountPrice > price) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('할인가는 판매가보다 높을 수 없습니다!')));
       return;
     }
-
-    int shippingFee = int.tryParse(_shippingFeeController.text) ?? 0;
+    int shippingFee =
+        int.tryParse(_shippingFeeController.text.replaceAll(',', '')) ?? 0;
 
     final product = Product(
       id: (widget.lastId + 1).toString(),
@@ -229,20 +225,21 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
     await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white, // 4. 팝업 배경 흰색
         contentPadding: const EdgeInsets.symmetric(
           vertical: 32,
           horizontal: 24,
-        ), // 위아래 여유
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center, // 수직 중앙 정렬
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
               '상품 등록이 완료되었습니다.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
-            const SizedBox(height: 28), // 텍스트와 버튼 사이 공간
+            const SizedBox(height: 28),
             Center(
               child: SizedBox(
                 width: 90,
@@ -265,18 +262,15 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
             ),
           ],
         ),
-        // actions 없앰 (Column에서 직접 배치)
       ),
     );
 
     Navigator.pop(context, product);
   }
 
-  // --- 미리보기 기능 추가 ---
   void _previewProduct() {
     if (_productNameController.text.trim().isEmpty ||
         _mainImageUrl == null ||
-        // 상품설명 이미지는 필수 항목에서 제거됨!
         _selectedCategory == null ||
         _selectedSubCategory == null ||
         _priceController.text.trim().isEmpty ||
@@ -288,15 +282,17 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
       return;
     }
 
-    final price = int.tryParse(_priceController.text) ?? 0;
-    int discountPrice = int.tryParse(_discountPriceController.text) ?? 0;
-    if (_discountPriceController.text.trim().isEmpty) {
-      discountPrice = price;
+    final price = int.tryParse(_priceController.text.replaceAll(',', '')) ?? 0;
+    int discountPrice = 0;
+    if (_discountPriceController.text.trim().isNotEmpty) {
+      discountPrice =
+          int.tryParse(_discountPriceController.text.replaceAll(',', '')) ?? 0;
     }
-    final shippingFee = int.tryParse(_shippingFeeController.text) ?? 0;
+    final shippingFee =
+        int.tryParse(_shippingFeeController.text.replaceAll(',', '')) ?? 0;
 
     final dummyProduct = Product(
-      id: "preview_id", // 미리보기용 임시 ID
+      id: "preview_id",
       productName: _productNameController.text.trim(),
       descImageUrl: _descImageUrl ?? '',
       category: _selectedCategory!,
@@ -323,7 +319,6 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
       ),
     );
   }
-  // --- 미리보기 기능 추가 끝 ---
 
   @override
   void dispose() {
@@ -366,8 +361,9 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
           ),
         ),
         centerTitle: true,
-        backgroundColor: const Color(0xFFB3E5FC), // 연하늘색
+        backgroundColor: Colors.white, // 1. 앱바 배경 흰색!
         elevation: 0,
+        surfaceTintColor: Colors.white,
       ),
       body: SafeArea(
         child: Column(
@@ -499,74 +495,6 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    // 동영상
-                    const Text(
-                      '동영상',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    _videoUrl == null
-                        ? InkWell(
-                            onTap: _pickVideo,
-                            borderRadius: borderRadius,
-                            child: Container(
-                              height: 140,
-                              decoration: BoxDecoration(
-                                color: Colors.grey[200],
-                                borderRadius: borderRadius,
-                                border: Border.all(color: mainBlue, width: 2),
-                              ),
-                              child: const Center(
-                                child: Icon(
-                                  Icons.video_collection_rounded,
-                                  color: Colors.blue,
-                                  size: 36,
-                                ),
-                              ),
-                            ),
-                          )
-                        : Stack(
-                            children: [
-                              ClipRRect(
-                                borderRadius: borderRadius,
-                                child: _videoThumbnailPath != null
-                                    ? Image.file(
-                                        File(_videoThumbnailPath!),
-                                        width: double.infinity,
-                                        height: 140,
-                                        fit: BoxFit.cover,
-                                      )
-                                    : Container(
-                                        width: double.infinity,
-                                        height: 140,
-                                        color: Colors.black,
-                                        child: Center(
-                                          child: CircularProgressIndicator(
-                                            color: mainBlue,
-                                          ),
-                                        ),
-                                      ),
-                              ),
-                              const Positioned.fill(
-                                child: Icon(
-                                  Icons.play_circle_fill,
-                                  color: Colors.white70,
-                                  size: 60,
-                                ),
-                              ),
-                              Positioned(
-                                top: 8,
-                                right: 8,
-                                child: buildDeleteButton(() {
-                                  setState(() {
-                                    _videoUrl = null;
-                                    _videoThumbnailPath = null;
-                                  });
-                                }),
-                              ),
-                            ],
-                          ),
-                    const SizedBox(height: 24),
                     // 상품 설명 이미지 (필수 아님)
                     const Text(
                       '상품 설명 이미지',
@@ -640,8 +568,7 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
                     DropdownButtonFormField<String>(
                       value: _selectedCategory,
                       decoration: inputStyle('카테고리를 선택하세요', borderRadius),
-                      // 연하늘색 드롭다운 배경!
-                      dropdownColor: const Color.fromARGB(255, 230, 247, 255),
+                      dropdownColor: const Color.fromARGB(255, 255, 255, 255),
                       items: _categories.map((String category) {
                         return DropdownMenuItem<String>(
                           value: category,
@@ -665,8 +592,7 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
                     DropdownButtonFormField<String>(
                       value: _selectedSubCategory,
                       decoration: inputStyle('세부 카테고리를 선택하세요', borderRadius),
-                      // 연하늘색 드롭다운 배경!
-                      dropdownColor: const Color.fromARGB(255, 230, 247, 255),
+                      dropdownColor: const Color.fromARGB(255, 255, 255, 255),
                       items: _selectedCategory == null
                           ? []
                           : _subCategories[_selectedCategory!]!.map((
@@ -708,8 +634,9 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
                             validator: (value) {
                               if (value == null ||
                                   value.trim().isEmpty ||
-                                  int.tryParse(value) == null ||
-                                  int.parse(value) <= 0) {
+                                  int.tryParse(value.replaceAll(',', '')) ==
+                                      null ||
+                                  int.parse(value.replaceAll(',', '')) <= 0) {
                                 return '유효한 판매가를 입력해주세요.';
                               }
                               return null;
@@ -734,15 +661,27 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
                                   ),
                                   validator: (value) {
                                     if (value != null && value.isNotEmpty) {
-                                      if (int.tryParse(value) == null ||
-                                          int.parse(value) < 0) {
+                                      if (int.tryParse(
+                                                value.replaceAll(',', ''),
+                                              ) ==
+                                              null ||
+                                          int.parse(value.replaceAll(',', '')) <
+                                              0) {
                                         return '유효한 할인 가격을 입력해주세요.';
                                       }
                                       final originalPrice =
-                                          int.tryParse(_priceController.text) ??
+                                          int.tryParse(
+                                            _priceController.text.replaceAll(
+                                              ',',
+                                              '',
+                                            ),
+                                          ) ??
                                           0;
                                       final discountPrice =
-                                          int.tryParse(value) ?? 0;
+                                          int.tryParse(
+                                            value.replaceAll(',', ''),
+                                          ) ??
+                                          0;
                                       if (discountPrice >= originalPrice &&
                                           originalPrice != 0) {
                                         return '할인가는 판매가보다 작아야 합니다.';
@@ -792,7 +731,7 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _shippingInfoController,
-                      maxLines: 1, // 1줄
+                      maxLines: 1,
                       decoration: inputStyle('배송 정보를 입력해주세요.', borderRadius),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -818,8 +757,8 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
                       validator: (value) {
                         if (value == null ||
                             value.trim().isEmpty ||
-                            int.tryParse(value) == null ||
-                            int.parse(value) < 0) {
+                            int.tryParse(value.replaceAll(',', '')) == null ||
+                            int.parse(value.replaceAll(',', '')) < 0) {
                           return '유효한 배송비를 입력해주세요.';
                         }
                         return null;
