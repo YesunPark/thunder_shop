@@ -12,6 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false, // 디버그 배너 숨김
       title: 'thunder_shop',
       initialRoute: '/',
       routes: {
