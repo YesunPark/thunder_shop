@@ -278,7 +278,9 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
       MaterialPageRoute(
         builder: (context) => ProductDetailPage(
           product: dummyProduct,
-          // isPreview: true, // 미리보기 모드임을 전달
+          cartItems: [],
+          onAddToCart: (_) {},
+          isPreview: true, // 미리보기 모드임을 전달
         ),
       ),
     );
