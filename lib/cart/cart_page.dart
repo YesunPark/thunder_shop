@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thunder_shop/model/cart_item.dart';
+import 'package:thunder_shop/product_list/product_list_page.dart';
 import 'package:thunder_shop/util/number_format_util.dart';
 import 'package:thunder_shop/style/common_colors.dart';
 
@@ -167,7 +168,11 @@ class _CartPageState extends State<CartPage> {
                         ),
                         padding: EdgeInsets.symmetric(vertical: 16),
                       ),
-                      onPressed: totalCount > 0 ? () {} : null,
+                      onPressed: totalCount > 0
+                          ? () {
+                              _showPaymentDialog();
+                            }
+                          : null,
                       child: Text(
                         '총 ${totalCount}개 상품 ${formatWithComma(totalPay)}원 구매하기',
                       ),
@@ -176,6 +181,45 @@ class _CartPageState extends State<CartPage> {
                 ],
               ),
             ),
+    );
+  }
+
+  // 구매완료 팝업 표시
+  void _showPaymentDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        contentPadding: const EdgeInsets.fromLTRB(24, 30, 0, 10),
+        content: Text(
+          '총 ${formatWithComma(totalPay)}원 결제되었습니다.',
+          style: TextStyle(fontSize: 16),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.grey.shade300),
+        ),
+        // actions 영역의 패딩 (버튼과 테두리 간격)
+        actionsPadding: const EdgeInsets.only(right: 16, bottom: 8),
+        actions: [
+          TextButton(
+            style: ButtonStyle(
+              // 눌렀을 때 보라색 대신 회색 오버레이
+              overlayColor: MaterialStateProperty.all(Colors.grey.shade200),
+            ),
+            onPressed: () {
+              // 다이얼로그 닫기
+              Navigator.of(context).pop();
+
+              // 상품 목록으로 이동
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => ProductListPage()),
+              );
+            },
+            child: Text('확인', style: TextStyle(color: Colors.black)),
+          ),
+        ],
+      ),
     );
   }
 }
