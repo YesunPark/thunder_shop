@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:thunder_shop/style/common_colors.dart';
 import 'package:thunder_shop/model/product.dart';
 
 class PurchaseBottomSheet extends StatefulWidget {
@@ -93,19 +94,23 @@ class _PurchaseBottomSheetState extends State<PurchaseBottomSheet> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    '${widget.originalPrice}원',
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      decoration: TextDecoration.lineThrough,
+                  // 할인 있을 때만 찍찍이
+                  if (widget.salePrice != null && widget.salePrice != 0)
+                    Text(
+                      '${widget.originalPrice}원',
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        decoration: TextDecoration.lineThrough,
+                      ),
                     ),
-                  ),
                   const SizedBox(height: 4),
                   Text(
-                    '${widget.salePrice}원',
-                    style: const TextStyle(
+                    // 할인 없으면 원래가격을 볼드+검정으로
+                    '${(widget.salePrice == null || widget.salePrice == 0) ? widget.originalPrice : widget.salePrice}원',
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 18,
+                      color: Colors.black, // 무조건 검정
                     ),
                   ),
                 ],
@@ -144,36 +149,59 @@ class _PurchaseBottomSheetState extends State<PurchaseBottomSheet> {
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text('구매 확인'),
-                        content: const Text('바로 구매하시겠습니까?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('취소'),
+                        content: SizedBox(
+                          height: 48,
+                          child: Center(
+                            child: Text(
+                              '\n바로 결제하시겠습니까?',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18, // 원하는 만큼 더 키워도 됨
+                              ),
+                            ),
                           ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              Navigator.of(context).pop();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('구매가 완료되었습니다')),
-                              );
-                            },
-                            child: const Text('확인'),
+                        ),
+                        actionsAlignment: MainAxisAlignment.center,
+                        actions: [
+                          SizedBox(
+                            width: 80,
+                            child: TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('취소'),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 80,
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                Navigator.of(context).pop();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('구매가 완료되었습니다')),
+                                );
+                              },
+                              child: const Text('확인'),
+                            ),
                           ),
                         ],
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
                     );
                   },
+
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    backgroundColor: Colors.black,
+                    backgroundColor: CommonColors.primary,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text('구매하기'),
+                  child: const Text('구매하기', style: TextStyle(fontSize: 16)),
                 ),
               ),
             ],
