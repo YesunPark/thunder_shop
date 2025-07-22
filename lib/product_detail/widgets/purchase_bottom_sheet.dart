@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:thunder_shop/model/product.dart';
 
 class PurchaseBottomSheet extends StatefulWidget {
+  final Product product;
+  // product를 추가해야해서 추가했습니다.
+  // 원래라면 productName, originalPrice, salePrice를 삭제하고 product 내의 값으로 대체해야 하지만
+  // 원활한 병합을 위해 일단 두겠습니다...ㅎㅎ - 예선
   final String productName;
   final int originalPrice;
   final int salePrice;
   final String imageUrl;
+  final void Function(Product, int) onAddToCart;
 
   const PurchaseBottomSheet({
     super.key,
+    required this.product,
     required this.productName,
     required this.originalPrice,
     required this.salePrice,
     required this.imageUrl,
+    required this.onAddToCart,
   });
 
   @override
@@ -121,13 +129,12 @@ class _PurchaseBottomSheetState extends State<PurchaseBottomSheet> {
           const SizedBox(height: 16),
           Row(
             children: [
+              // 장바구니 icon
               IconButton(
                 icon: const Icon(Icons.add_shopping_cart_outlined, size: 28),
                 onPressed: () {
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('장바구니에 추가되었습니다')),
-                  );
+                  widget.onAddToCart(widget.product, quantity);
                 },
               ),
               const SizedBox(width: 8),

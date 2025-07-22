@@ -705,13 +705,13 @@ class _ProductListPageState extends State<ProductListPage> {
   List<CartItem> cartItems = [];
 
   // 장바구니에 상품 추가 로직
-  void _addToCart(Product product) {
+  void _addToCart(Product product, int quantity) {
     setState(() {
       final idx = cartItems.indexWhere((item) => item.product.id == product.id);
       if (idx >= 0) {
-        cartItems[idx].quantity++;
+        cartItems[idx].quantity += quantity;
       } else {
-        cartItems.add(CartItem(product: product));
+        cartItems.add(CartItem(product: product, quantity: quantity));
       }
     });
 

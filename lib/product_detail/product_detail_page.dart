@@ -13,7 +13,7 @@ import 'package:thunder_shop/cart/cart_page.dart';
 class ProductDetailPage extends StatefulWidget {
   final Product product;
   final List<CartItem> cartItems;
-  final void Function(Product) onAddToCart;
+  final void Function(Product, int) onAddToCart;
   final bool isPreview;
 
   const ProductDetailPage({
@@ -61,16 +61,18 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) => PurchaseBottomSheet(
+        product: widget.product,
         productName: widget.product.productName,
         originalPrice: widget.product.price,
         salePrice: widget.product.discountPrice,
         imageUrl: imageList[0],
+        onAddToCart: widget.onAddToCart,
       ),
     );
   }
 
   void _addToCart(BuildContext context) {
-    widget.onAddToCart(widget.product);
+    widget.onAddToCart(widget.product, 1);
   }
 
   void _updateReviewCount(int count) {

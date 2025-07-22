@@ -9,12 +9,12 @@ import 'package:thunder_shop/util/number_format_util.dart';
 class ProductItem extends StatefulWidget {
   final Product product;
   final List<CartItem> cartItems;
-  final void Function(Product)? onAddToCart;
+  final void Function(Product, int) onAddToCart;
 
   const ProductItem({
     required this.product,
     required this.cartItems,
-    this.onAddToCart,
+    required this.onAddToCart,
     super.key,
   });
 
@@ -30,9 +30,7 @@ class _ProductItemState extends State<ProductItem> {
   }
 
   void _addToCart(BuildContext context) {
-    if (widget.onAddToCart != null) {
-      widget.onAddToCart!(widget.product);
-    }
+    widget.onAddToCart(widget.product, 1);
   }
 
   void _goToDetailPage(BuildContext context) {
