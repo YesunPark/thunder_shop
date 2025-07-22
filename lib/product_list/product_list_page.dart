@@ -700,7 +700,6 @@ class ProductListPage extends StatefulWidget {
 class _ProductListPageState extends State<ProductListPage> {
   String selectedCategory = '식품';
   String selectedCategoryDetail = '전체';
-  bool isGridView = true;
 
   // 장바구니 상태
   List<CartItem> cartItems = [];
@@ -757,7 +756,9 @@ class _ProductListPageState extends State<ProductListPage> {
     }).toList();
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        surfaceTintColor: Colors.white,
         automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 0,
@@ -799,11 +800,6 @@ class _ProductListPageState extends State<ProductListPage> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                   ),
-                  icon: const Icon(
-                    Icons.add_box_outlined,
-                    size: 18,
-                    color: Colors.white,
-                  ),
                   label: const Text('상품 등록', style: TextStyle(fontSize: 13)),
                 ),
                 IconButton(
@@ -840,59 +836,26 @@ class _ProductListPageState extends State<ProductListPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('총 ${filteredProducts.length}개'),
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: () => setState(() => isGridView = false),
-                      icon: Icon(
-                        Icons.view_list,
-                        color: isGridView ? Colors.grey : Colors.black,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () => setState(() => isGridView = true),
-                      icon: Icon(
-                        Icons.grid_view,
-                        color: isGridView ? Colors.black : Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              children: [Text('총 ${filteredProducts.length}개')],
             ),
           ),
           Expanded(
-            child: isGridView
-                ? GridView.count(
-                    padding: const EdgeInsets.all(12),
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 0.58,
-                    children: filteredProducts
-                        .map(
-                          (product) => ProductItem(
-                            product: product,
-                            onAddToCart: _addToCart,
-                            cartItems: cartItems,
-                          ),
-                        )
-                        .toList(),
+            child: GridView.count(
+              padding: const EdgeInsets.all(12),
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.58,
+              children: filteredProducts
+                  .map(
+                    (product) => ProductItem(
+                      product: product,
+                      onAddToCart: _addToCart,
+                      cartItems: cartItems,
+                    ),
                   )
-                : ListView.builder(
-                    itemCount: filteredProducts.length,
-                    itemBuilder: (context, index) {
-                      final product = filteredProducts[index];
-                      return ProductItem(
-                        product: product,
-                        onAddToCart: _addToCart,
-                        cartItems: cartItems,
-                        isRow: true,
-                      );
-                    },
-                  ),
+                  .toList(),
+            ),
           ),
         ],
       ),
