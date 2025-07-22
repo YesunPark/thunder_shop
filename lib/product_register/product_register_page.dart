@@ -318,6 +318,7 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
             // 미리보기 모드이므로 실제 로직은 비워둡니다.
           },
           isPreview: true,
+          shippingFee: shippingFee,
         ),
       ),
     );
