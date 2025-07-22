@@ -13,6 +13,43 @@ class ProductImageSlider extends StatelessWidget {
     required this.onPageChanged,
   });
 
+  // 이미지 타입별 자동 분기
+  Widget buildImage(String path) {
+    if (path.startsWith('http')) {
+      return Image.network(
+        path,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          color: Colors.grey[300],
+          alignment: Alignment.center,
+          child: const Icon(Icons.broken_image),
+        ),
+      );
+    } else if (path.startsWith('/')) {
+      // 로컬 파일
+      return Image.file(
+        File(path),
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          color: Colors.grey[300],
+          alignment: Alignment.center,
+          child: const Icon(Icons.broken_image),
+        ),
+      );
+    } else {
+      // assets
+      return Image.asset(
+        path,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          color: Colors.grey[300],
+          alignment: Alignment.center,
+          child: const Icon(Icons.broken_image),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -24,17 +61,8 @@ class ProductImageSlider extends StatelessWidget {
             onPageChanged: onPageChanged,
             itemBuilder: (context, index) {
               final path = imageList[index];
-              return Image.file(
-                File(path),
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.grey[300],
-                    alignment: Alignment.center,
-                    child: const Icon(Icons.broken_image),
-                  );
-                },
-              );
+              // **자동 분기 함수 사용!**
+              return buildImage(path);
             },
           ),
         ),
