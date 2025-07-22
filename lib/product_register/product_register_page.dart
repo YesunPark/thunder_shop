@@ -4,6 +4,7 @@ import 'package:intl/intl.dart'; // 콤마(,) 처리를 위한 패키지 추가!
 import 'package:image_picker/image_picker.dart';
 import 'package:thunder_shop/model/product.dart';
 import 'package:thunder_shop/product_detail/product_detail_page.dart';
+import 'package:thunder_shop/style/common_colors.dart';
 
 class ProductRegisterPage extends StatefulWidget {
   final int lastId;
@@ -397,7 +398,7 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
                               child: const Center(
                                 child: Icon(
                                   Icons.add_a_photo_rounded,
-                                  color: Colors.blue,
+                                  color: CommonColors.primary,
                                   size: 36,
                                 ),
                               ),
@@ -456,7 +457,7 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
                                   child: const Center(
                                     child: Icon(
                                       Icons.add_a_photo_rounded,
-                                      color: Colors.blue,
+                                      color: CommonColors.primary,
                                       size: 30,
                                     ),
                                   ),
