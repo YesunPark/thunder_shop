@@ -130,7 +130,10 @@ class _ProductItemState extends State<ProductItem> {
             const SizedBox(height: 4),
 
             // 가격
-            if (isDiscount) ...[
+            if (widget.product.discountPrice != null &&
+                widget.product.discountPrice != 0 &&
+                widget.product.discountPrice! < widget.product.price) ...[
+              // 원래 가격 (회색, 줄긋기)
               Text(
                 '${formatWithComma(widget.product.price)}원',
                 style: const TextStyle(
@@ -139,6 +142,7 @@ class _ProductItemState extends State<ProductItem> {
                   fontSize: 13,
                 ),
               ),
+              // 할인율 및 할인 가격
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -165,10 +169,12 @@ class _ProductItemState extends State<ProductItem> {
                 ],
               ),
             ] else
+              // 할인이 없을 때 (할인가 == 0 or null)
               Text(
                 '${formatWithComma(widget.product.price)}원',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
+                  color: Colors.black,
                   fontSize: 15,
                 ),
               ),
