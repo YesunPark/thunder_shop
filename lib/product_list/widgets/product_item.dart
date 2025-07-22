@@ -69,150 +69,142 @@ class _ProductItemState extends State<ProductItem> {
           )
         : null;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        Widget priceWidget() {
-          if (isDiscount) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return GestureDetector(
+      onTap: () => _goToDetailPage(context),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(14),
+          color: Colors.white,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 이미지 + 하트
+            Stack(
               children: [
-                Text(
-                  '${formatWithComma(widget.product.price)}원',
-                  style: const TextStyle(
-                    decoration: TextDecoration.lineThrough,
-                    color: Colors.grey,
-                    fontSize: 13,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset(
+                    widget.product.mainImageUrl,
+                    height: 120,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      height: 120,
+                      width: double.infinity,
+                      color: Colors.grey[300],
+                      alignment: Alignment.center,
+                      child: const Text('이미지'),
+                    ),
                   ),
                 ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    if (discountPercent != null)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 6.0),
-                        child: Text(
-                          '${discountPercent}%',
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    Text(
-                      '${formatWithComma(widget.product.discountPrice!)}원',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                        fontSize: 15,
-                      ),
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: GestureDetector(
+                    onTap: toggleFavorite,
+                    child: Icon(
+                      widget.product.isLiked
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color: widget.product.isLiked
+                          ? CommonColors.primary
+                          : Colors.grey,
                     ),
-                  ],
+                  ),
                 ),
               ],
-            );
-          } else {
-            return Text(
-              '${formatWithComma(widget.product.price)}원',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-            );
-          }
-        }
+            ),
+            const SizedBox(height: 12),
 
-        return GestureDetector(
-          onTap: () => _goToDetailPage(context),
-          child: Container(
-            constraints: const BoxConstraints(maxHeight: 270),
-            padding: const EdgeInsets.all(30),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(14),
-              color: Colors.white,
+            // 상품명
+            Text(
+              widget.product.productName,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 이미지 + 하트 우상단
-                Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.asset(
-                        widget.product.mainImageUrl,
-                        height: 120,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          height: 120,
-                          width: double.infinity,
-                          color: Colors.grey[300],
-                          alignment: Alignment.center,
-                          child: const Text('이미지'),
+
+            const SizedBox(height: 4),
+
+            // 가격
+            if (isDiscount) ...[
+              Text(
+                '${formatWithComma(widget.product.price)}원',
+                style: const TextStyle(
+                  decoration: TextDecoration.lineThrough,
+                  color: Colors.grey,
+                  fontSize: 13,
+                ),
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  if (discountPercent != null)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 6.0),
+                      child: Text(
+                        '${discountPercent}%',
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
                         ),
                       ),
                     ),
-                    Positioned(
-                      top: 6,
-                      right: 6,
-                      child: GestureDetector(
-                        onTap: toggleFavorite,
-                        child: Icon(
-                          widget.product.isLiked
-                              ? Icons.favorite
-                              : Icons.favorite_border,
-                          color: widget.product.isLiked
-                              ? CommonColors.primary
-                              : Colors.grey,
-                        ),
-                      ),
+                  Text(
+                    '${formatWithComma(widget.product.discountPrice!)}원',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                      fontSize: 15,
                     ),
+                  ),
+                ],
+              ),
+            ] else
+              Text(
+                '${formatWithComma(widget.product.price)}원',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
+
+            const Spacer(), // 🔥 여기가 핵심! 남는 공간을 밀어줌
+            // 버튼
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => _addToCart(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: const BorderSide(color: CommonColors.primary),
+                  ),
+                  elevation: 0,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(
+                      Icons.shopping_cart_outlined,
+                      color: CommonColors.primary,
+                    ),
+                    SizedBox(width: 6),
+                    Text('담기'),
                   ],
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  widget.product.productName,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                priceWidget(),
-                const Spacer(),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => _addToCart(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        side: const BorderSide(color: CommonColors.primary),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Icon(
-                          Icons.shopping_cart_outlined,
-                          color: CommonColors.primary,
-                        ),
-                        SizedBox(width: 6),
-                        Text('담기'),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 }
