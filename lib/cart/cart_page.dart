@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thunder_shop/model/cart_item.dart';
+import 'package:thunder_shop/util/number_format_util.dart';
 import 'package:thunder_shop/style/common_colors.dart';
 
 class CartPage extends StatefulWidget {
@@ -164,7 +165,9 @@ class _CartPageState extends State<CartPage> {
                         padding: EdgeInsets.symmetric(vertical: 16),
                       ),
                       onPressed: totalCount > 0 ? () {} : null,
-                      child: Text('총 ${totalCount}개 상품 ${totalPay}원 구매하기'),
+                      child: Text(
+                        '총 ${totalCount}개 상품 ${formatWithComma(totalPay)}원 구매하기',
+                      ),
                     ),
                   ),
                 ],
@@ -337,7 +340,7 @@ class CartItemCard extends StatelessWidget {
                           children: [
                             // 원가
                             Text(
-                              '${item.product.price}원',
+                              '${formatWithComma(item.product.price)}원',
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 fontSize: 10,
@@ -348,7 +351,7 @@ class CartItemCard extends StatelessWidget {
                             SizedBox(height: 3),
                             // 할인가
                             Text(
-                              '${item.product.discountPrice}원',
+                              '${formatWithComma(item.product.discountPrice)}원',
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 fontSize: 16,
@@ -367,7 +370,7 @@ class CartItemCard extends StatelessWidget {
                                 ),
                                 SizedBox(width: 10),
                                 Text(
-                                  '${item.product.shippingFee}원',
+                                  '${formatWithComma(item.product.shippingFee)}원',
                                   textAlign: TextAlign.right,
                                   style: TextStyle(fontSize: 12),
                                 ),
@@ -423,17 +426,26 @@ class TotalPriceInfo extends StatelessWidget {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [Text('총 상품 금액'), Text('${totalProductPrice} 원')],
+            children: [
+              Text('총 상품 금액'),
+              Text('${formatWithComma(totalProductPrice)} 원'),
+            ],
           ),
           SizedBox(height: 4),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [Text('총 배송비'), Text('+ ${totalShippingFee} 원')],
+            children: [
+              Text('총 배송비'),
+              Text('+ ${formatWithComma(totalShippingFee)} 원'),
+            ],
           ),
           SizedBox(height: 4),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [Text('총 할인 금액'), Text('- ${totalDiscount} 원')],
+            children: [
+              Text('총 할인 금액'),
+              Text('- ${formatWithComma(totalDiscount)} 원'),
+            ],
           ),
           SizedBox(height: 8),
           Row(
@@ -444,7 +456,7 @@ class TotalPriceInfo extends StatelessWidget {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               Text(
-                '${totalPay} 원',
+                '${formatWithComma(totalPay)} 원',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ],

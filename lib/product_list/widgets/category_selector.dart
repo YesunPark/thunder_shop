@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:thunder_shop/style/common_colors.dart'; // primary 색상을 위해 필요
 
 class CategorySelector extends StatelessWidget {
   final String selectedCategory;
-  final String selectedCategoryDetail; // 변수명 변경
+  final String selectedCategoryDetail;
   final Function(String) onCategorySelected;
-  final Function(String) onCategoryDetailSelected; // 함수명 변경
+  final Function(String) onCategoryDetailSelected;
 
   CategorySelector({
     required this.selectedCategory,
-    required this.selectedCategoryDetail, // 변수명 변경
+    required this.selectedCategoryDetail,
     required this.onCategorySelected,
-    required this.onCategoryDetailSelected, // 함수명 변경
+    required this.onCategoryDetailSelected,
     super.key,
   });
 
@@ -22,46 +23,87 @@ class CategorySelector extends StatelessWidget {
     '서비스': ['전체', 'PT/운동 클래스'],
   };
 
-  Widget buildCategoryBox(String label, bool selected, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          border: selected ? Border.all(color: Colors.black) : null,
-          borderRadius: BorderRadius.circular(20),
-          color: Colors.white,
-        ),
-        child: Text(label),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final categoryDetails = categoryMap[selectedCategory]!; // 변수명 변경
+    final categoryDetails = categoryMap[selectedCategory]!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Wrap(
+        const SizedBox(height: 16),
+        // 상단 카테고리 탭
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: categoryMap.keys.map((cat) {
-            return buildCategoryBox(
-              cat,
-              cat == selectedCategory,
-              () => onCategorySelected(cat),
+            final isSelected = cat == selectedCategory;
+            return GestureDetector(
+              onTap: () => onCategorySelected(cat),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    cat,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isSelected ? Colors.black : Colors.grey,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Container(
+                    height: 2,
+                    width: 30,
+                    color: isSelected ? Colors.black : Colors.transparent,
+                  ),
+                ],
+              ),
             );
           }).toList(),
         ),
-        Wrap(
-          children: categoryDetails.map((detail) {
-            return buildCategoryBox(
-              detail,
-              detail == selectedCategoryDetail,
-              () => onCategoryDetailSelected(detail),
-            );
-          }).toList(),
+        SizedBox(height: 12),
+        // 하단 상세 카테고리
+        SizedBox(
+          height: 50,
+          child: Center(
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              children: categoryDetails.map((detail) {
+                final isSelected = detail == selectedCategoryDetail;
+                return GestureDetector(
+                  onTap: () => onCategoryDetailSelected(detail),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          detail,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: isSelected
+                                ? CommonColors.primary
+                                : Colors.grey,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                        ),
+                        SizedBox(height: 6),
+                        Container(
+                          height: 3,
+                          width: isSelected ? 30 : 0,
+                          color: CommonColors.primary,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
         ),
       ],
     );
