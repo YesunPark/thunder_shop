@@ -8,6 +8,7 @@ import '../product_detail/product_detail_page.dart';
 
 import 'widgets/category_selector.dart';
 import 'widgets/product_item.dart';
+import 'package:thunder_shop/style/common_colors.dart';
 
 // ------- 샘플 상품 데이터 --------
 List<Product> allProducts = [
@@ -784,17 +785,22 @@ class _ProductListPageState extends State<ProductListPage> {
                 TextButton.icon(
                   onPressed: goToRegisterPage,
                   style: TextButton.styleFrom(
-                    foregroundColor: Colors.black,
+                    backgroundColor: CommonColors.primary,
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
                       vertical: 6,
                     ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                   ),
-                  icon: const Icon(Icons.add_box, color: Colors.black),
-                  label: const Text(
-                    '상품 등록',
-                    style: TextStyle(color: Colors.black),
+                  icon: const Icon(
+                    Icons.add_box_outlined,
+                    size: 18,
+                    color: Colors.white,
                   ),
+                  label: const Text('상품 등록', style: TextStyle(fontSize: 13)),
                 ),
                 IconButton(
                   onPressed: goToCartPage,
