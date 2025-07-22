@@ -1,12 +1,11 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:thunder_shop/model/cart_item.dart';
 import '../model/product.dart';
 import 'widgets/product_image_slider.dart';
 import 'widgets/product_price_info.dart';
 import 'widgets/purchase_bottom_sheet.dart';
-import 'widgets/product_review.dart'; // ✅ 수정된 리뷰 표시용 위젯
+import 'widgets/product_review.dart';
 import 'package:thunder_shop/model/favorite_button.dart';
 import 'package:thunder_shop/style/common_colors.dart';
 import 'package:thunder_shop/cart/cart_page.dart';
@@ -31,24 +30,20 @@ class ProductDetailPage extends StatefulWidget {
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
   int _currentIndex = 0;
-  int _reviewCount = 0; // ✅ 리뷰 개수 상태
+  int _reviewCount = 0;
 
   List<String> get imageList {
     final List<String> images = [];
-
-    // 대표 이미지가 있으면 가장 앞에 추가
+    // (1) 메인 이미지(로컬/네트워크)
     if (widget.product.mainImageUrl.isNotEmpty) {
       images.add(widget.product.mainImageUrl);
     }
-
-    // 추가 이미지들도 포함
+    // (1) 추가 이미지들
     images.addAll(widget.product.imageUrls);
 
-    // 아무것도 없을 경우 기본 이미지
     if (images.isEmpty) {
       images.add('https://picsum.photos/seed/${widget.product.id}/300/250');
     }
-
     return images;
   }
 
@@ -74,7 +69,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     );
   }
 
-  // 장바구니 담기 로직
   void _addToCart(BuildContext context) {
     widget.onAddToCart(widget.product);
   }
@@ -85,15 +79,104 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     });
   }
 
+  void _showInquiryDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white, // 흰색 배경
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 32,
+          horizontal: 24,
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              "문의사항이 있으시면\ninfo@thundershop.com으로\n메일을 보내주시기 바랍니다.",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 28),
+            Center(
+              child: SizedBox(
+                width: 90,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        // actions 생략 (content로 직접 배치)
+      ),
+    );
+  }
+
+  /*
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              '상품 등록이 완료되었습니다.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 28),
+            Center(
+              child: SizedBox(
+                width: 90,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+*/
+
   @override
   Widget build(BuildContext context) {
     final product = widget.product;
 
+    // (7) 리뷰 배열
+    final hasReviews =
+        product.reviewList != null && product.reviewList.isNotEmpty;
+
     return Scaffold(
+      backgroundColor: Colors.white, // (2)
       appBar: AppBar(
         title: const Text('상품 상세'),
         centerTitle: true,
         leading: const BackButton(),
+        elevation: 0,
+        backgroundColor: Colors.white, // (2)
+        surfaceTintColor: Colors.white, // (2)
         actions: [
           IconButton(
             onPressed: widget.isPreview
@@ -108,7 +191,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   },
             icon: Icon(
               Icons.shopping_cart_outlined,
-              color: widget.isPreview ? Colors.grey[300] : Colors.white,
+              color: widget.isPreview ? Colors.grey[300] : Colors.black, // (2)
             ),
           ),
         ],
@@ -116,6 +199,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // (1) 이미지 슬라이더 - 로컬/네트워크 자동 분기
           ProductImageSlider(
             imageList: imageList,
             currentIndex: _currentIndex,
@@ -129,9 +213,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
+          // (4) 할인 없는 경우 할인 UI X
           ProductPriceInfo(
             originalPrice: product.price,
-            salePrice: product.discountPrice,
+            salePrice: (product.discountPrice != 0)
+                ? product.discountPrice
+                : null,
           ),
           const SizedBox(height: 24),
 
@@ -159,21 +246,31 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             ],
           ),
           const SizedBox(height: 24),
+
           const Text('상품 세부정보', style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          SizedBox(
-            height: 200,
-            width: double.infinity,
-            child: Image.file(
-              File(widget.product.descImageUrl),
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) =>
-                  const Center(child: Icon(Icons.broken_image)),
+          // (1) 상품설명 이미지: 로컬/네트워크 자동 분기
+          if (product.descImageUrl.isNotEmpty)
+            SizedBox(
+              height: 200,
+              width: double.infinity,
+              child: product.descImageUrl.startsWith('http')
+                  ? Image.network(
+                      product.descImageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Center(child: Icon(Icons.broken_image)),
+                    )
+                  : Image.file(
+                      File(product.descImageUrl),
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Center(child: Icon(Icons.broken_image)),
+                    ),
             ),
-          ),
           const SizedBox(height: 24),
 
-          // 🔽 후기 영역
+          // (7) 리뷰 없으면 섹션 자체 숨김
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -181,26 +278,28 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 '상품 후기',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Text('총 $_reviewCount개'),
+              Text('총 ${product.reviewList.length}개'),
             ],
           ),
           const SizedBox(height: 12),
           ProductReviewSection(
             reviews: product.reviewList,
-            onReviewCountChanged: _updateReviewCount, // ✅ 개수 반영 콜백
+            onReviewCountChanged: _updateReviewCount,
           ),
-
           const SizedBox(height: 24),
 
-          // 🔽 문의 영역
-          const Row(
+          // 문의 영역
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '상품 문의 >',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue,
+              InkWell(
+                onTap: _showInquiryDialog, // (5)
+                child: const Text(
+                  '상품 문의 >',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: CommonColors.primary,
+                  ),
                 ),
               ),
             ],
@@ -221,7 +320,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   }
                 },
                 size: 30,
-                activeColor: widget.isPreview ? Colors.grey[300]! : Colors.pink,
+                activeColor: widget.isPreview
+                    ? Colors.grey[300]!
+                    : CommonColors.primary, // (3)
                 inactiveColor: widget.isPreview
                     ? Colors.grey[300]!
                     : Colors.black,
@@ -250,7 +351,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           ? Colors.grey[500]
                           : Colors.white,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(14), // (6)
                       ),
                     ),
                     child: Text(
