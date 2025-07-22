@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // 👈 꼭 추가!
+import 'package:intl/intl.dart';
 import 'package:thunder_shop/model/cart_item.dart';
 import 'package:thunder_shop/model/product.dart';
 import 'package:thunder_shop/product_detail/product_detail_page.dart';
+import 'package:thunder_shop/style/common_colors.dart';
 
 class ProductItem extends StatefulWidget {
   final Product product;
@@ -65,7 +66,7 @@ class _ProductItemState extends State<ProductItem> {
   Widget build(BuildContext context) {
     final isDiscount =
         widget.product.discountPrice != null &&
-        widget.product.discountPrice < widget.product.price;
+        widget.product.discountPrice! < widget.product.price;
     final discountPercent = isDiscount
         ? calcDiscountPercent(
             widget.product.price,
@@ -124,42 +125,150 @@ class _ProductItemState extends State<ProductItem> {
 
         return GestureDetector(
           onTap: () => _goToDetailPage(context),
-          child: Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(14),
-              color: Colors.white,
-            ),
-            child: isCard
-                ? Column(
+          child: widget.isRow
+              ? Card(
+                  margin: const EdgeInsets.symmetric(vertical: 6),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  elevation: 2,
+                  color: Colors.white, // ✅ 카드 배경색 흰색으로 고정
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 이미지 + 하트
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Stack(
+                            children: [
+                              Image.asset(
+                                widget.product.mainImageUrl,
+                                width: 90,
+                                height: 90,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  width: 90,
+                                  height: 90,
+                                  color: Colors.grey[300],
+                                  alignment: Alignment.center,
+                                  child: const Text('이미지'),
+                                ),
+                              ),
+                              Positioned(
+                                top: 6,
+                                right: 6,
+                                child: GestureDetector(
+                                  onTap: toggleFavorite,
+                                  child: Icon(
+                                    widget.product.isLiked
+                                        ? Icons.favorite
+                                        : Icons.favorite_border,
+                                    color: widget.product.isLiked
+                                        ? CommonColors.primary
+                                        : Colors.grey,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+
+                        // 상품 정보 + 버튼
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.product.productName,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              priceWidget(),
+                              const SizedBox(height: 10),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: OutlinedButton.icon(
+                                  onPressed: () => _addToCart(context),
+                                  icon: const Icon(
+                                    Icons.shopping_cart_outlined,
+                                    size: 18,
+                                    color: CommonColors.primary,
+                                  ),
+                                  label: const Text(
+                                    '담기',
+                                    style: TextStyle(color: Colors.black),
+                                  ),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
+                                    side: const BorderSide(
+                                      color: CommonColors.primary,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    elevation: 0,
+                                    backgroundColor: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(14),
+                    color: Colors.white, // ✅ 배경 흰색
+                  ),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // 이미지 + 하트 우상단
                       Stack(
                         children: [
-                          Container(
-                            height: 120,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[300],
-                              borderRadius: BorderRadius.circular(8),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.asset(
+                              widget.product.mainImageUrl,
+                              height: 120,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Container(
+                                height: 120,
+                                width: double.infinity,
+                                color: Colors.grey[300],
+                                alignment: Alignment.center,
+                                child: const Text('이미지'),
+                              ),
                             ),
-                            alignment: Alignment.center,
-                            child: const Text('이미지'),
                           ),
                           Positioned(
-                            top: 0,
-                            right: 0,
-                            child: IconButton(
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                              onPressed: toggleFavorite,
-                              icon: Icon(
+                            top: 6,
+                            right: 6,
+                            child: GestureDetector(
+                              onTap: toggleFavorite,
+                              child: Icon(
                                 widget.product.isLiked
                                     ? Icons.favorite
                                     : Icons.favorite_border,
                                 color: widget.product.isLiked
-                                    ? Colors.red
+                                    ? CommonColors.primary
                                     : Colors.grey,
                               ),
                             ),
@@ -184,63 +293,33 @@ class _ProductItemState extends State<ProductItem> {
                         child: ElevatedButton(
                           onPressed: () => _addToCart(context),
                           style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.black,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
+                              side: const BorderSide(
+                                color: CommonColors.primary,
+                              ),
                             ),
+                            elevation: 0,
                           ),
-                          child: const Text('담기'),
-                        ),
-                      ),
-                    ],
-                  )
-                : Row(
-                    children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        alignment: Alignment.center,
-                        child: const Text('이미지'),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.product.productName,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            priceWidget(),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      SizedBox(
-                        height: 40,
-                        child: ElevatedButton(
-                          onPressed: () => _addToCart(context),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Icon(
+                                Icons.shopping_cart_outlined,
+                                color: CommonColors.primary,
+                              ),
+                              SizedBox(width: 6),
+                              Text('담기'),
+                            ],
                           ),
-                          child: const Text('담기'),
                         ),
                       ),
                     ],
                   ),
-          ),
+                ),
         );
       },
     );
