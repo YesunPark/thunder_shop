@@ -716,9 +716,13 @@ class _ProductListPageState extends State<ProductListPage> {
       }
     });
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('장바구니에 추가되었습니다')));
+    final messenger = ScaffoldMessenger.of(context);
+    // 기존 스낵바가 있으면 숨기고
+    messenger.hideCurrentSnackBar();
+    // 표시 시간을 1초로 줄인 스낵바 보여주기
+    messenger.showSnackBar(
+      SnackBar(content: Text('장바구니에 추가되었습니다'), duration: Duration(seconds: 1)),
+    );
   }
 
   Future<void> goToRegisterPage() async {
