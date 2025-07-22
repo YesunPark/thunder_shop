@@ -46,10 +46,9 @@ class _PurchaseBottomSheetState extends State<PurchaseBottomSheet> {
                 height: 60,
                 margin: const EdgeInsets.only(right: 12),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Image.network(widget.imageUrl, fit: BoxFit.cover),
+                child: Image.asset(widget.imageUrl, fit: BoxFit.cover),
               ),
               Expanded(
                 child: Column(
