@@ -41,6 +41,7 @@ class _ProductItemState extends State<ProductItem> {
           product: widget.product,
           onAddToCart: widget.onAddToCart!,
           cartItems: widget.cartItems,
+          shippingFee: widget.product.shippingFee,
         ),
       ),
     ).then((_) {
