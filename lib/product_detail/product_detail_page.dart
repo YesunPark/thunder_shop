@@ -79,24 +79,86 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     });
   }
 
-  // (5) 문의 팝업
   void _showInquiryDialog() {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        content: const Text(
-          "문의사항이 있으시면 info@thundershop.com으로 메일을 보내주시기 바랍니다. 감사합니다.",
-          textAlign: TextAlign.center,
+        backgroundColor: Colors.white, // 흰색 배경
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 32,
+          horizontal: 24,
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
-          ),
-        ],
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              "문의사항이 있으시면\ninfo@thundershop.com으로\n메일을 보내주시기 바랍니다.",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 28),
+            Center(
+              child: SizedBox(
+                width: 90,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        // actions 생략 (content로 직접 배치)
       ),
     );
   }
+
+  /*
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              '상품 등록이 완료되었습니다.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 28),
+            Center(
+              child: SizedBox(
+                width: 90,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+*/
 
   @override
   Widget build(BuildContext context) {
@@ -209,24 +271,22 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           const SizedBox(height: 24),
 
           // (7) 리뷰 없으면 섹션 자체 숨김
-          if (hasReviews) ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  '상품 후기',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text('총 ${product.reviewList.length}개'),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ProductReviewSection(
-              reviews: product.reviewList,
-              onReviewCountChanged: _updateReviewCount,
-            ),
-            const SizedBox(height: 24),
-          ],
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                '상품 후기',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text('총 ${product.reviewList.length}개'),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ProductReviewSection(
+            reviews: product.reviewList,
+            onReviewCountChanged: _updateReviewCount,
+          ),
+          const SizedBox(height: 24),
 
           // 문의 영역
           Row(
@@ -238,7 +298,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   '상품 문의 >',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue,
+                    color: CommonColors.primary,
                   ),
                 ),
               ),
