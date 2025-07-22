@@ -20,7 +20,7 @@ class _CartPageState extends State<CartPage> {
   // 상품 원가 총합 금액
   int get totalProductPrice => cartItems
       .where((item) => item.selected)
-      .fold(0, (sum, item) => sum + item.product.discountPrice * item.quantity);
+      .fold(0, (sum, item) => sum + item.product.price * item.quantity);
 
   // 총 배송비 금액
   int get totalShippingFee => cartItems
@@ -28,17 +28,20 @@ class _CartPageState extends State<CartPage> {
       .fold(0, (sum, item) => sum + item.product.shippingFee);
 
   // 총 할인된 금액
-  int get totalDiscount => cartItems
-      .where((item) => item.selected)
-      .fold(
-        0,
-        (sum, item) =>
-            sum +
-            (item.product.price - item.product.discountPrice) * item.quantity,
-      );
+  int get totalDiscount => cartItems.where((item) => item.selected).fold(0, (
+    sum,
+    item,
+  ) {
+    // discountPrice가 0이면 원가(price)로 대체
+    final effectiveDiscountPrice = item.product.discountPrice == 0
+        ? item.product.price
+        : item.product.discountPrice;
+    // (원가 - 할인된 가격) * 수량
+    return sum + (item.product.price - effectiveDiscountPrice) * item.quantity;
+  });
 
   // 총 결제 금액
-  int get totalPay => totalProductPrice + totalShippingFee;
+  int get totalPay => totalProductPrice - totalDiscount + totalShippingFee;
 
   // 선택된 상품 개수
   int get totalCount => cartItems
@@ -339,19 +342,22 @@ class CartItemCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             // 원가
-                            Text(
-                              '${formatWithComma(item.product.price)}원',
-                              textAlign: TextAlign.right,
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.grey,
-                                decoration: TextDecoration.lineThrough,
+                            if (item.product.discountPrice != 0) ...[
+                              Text(
+                                '${formatWithComma(item.product.price)}원',
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.grey,
+                                  decoration: TextDecoration.lineThrough,
+                                ),
                               ),
-                            ),
-                            SizedBox(height: 3),
-                            // 할인가
+                              SizedBox(height: 3),
+                            ],
+
+                            // 할인가(판매가)
                             Text(
-                              '${formatWithComma(item.product.discountPrice)}원',
+                              '${formatWithComma(item.product.discountPrice != 0 ? item.product.discountPrice : item.product.price)}원',
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 fontSize: 16,
