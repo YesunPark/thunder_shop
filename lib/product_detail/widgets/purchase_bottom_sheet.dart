@@ -13,6 +13,7 @@ class PurchaseBottomSheet extends StatefulWidget {
   final int salePrice;
   final String imageUrl;
   final void Function(Product, int) onAddToCart;
+  final int shippingFee; // 배송비 추가
 
   const PurchaseBottomSheet({
     super.key,
@@ -22,6 +23,7 @@ class PurchaseBottomSheet extends StatefulWidget {
     required this.salePrice,
     required this.imageUrl,
     required this.onAddToCart,
+    required this.shippingFee, // 배송비 추가
   });
 
   @override
@@ -37,7 +39,8 @@ class _PurchaseBottomSheetState extends State<PurchaseBottomSheet> {
   Widget build(BuildContext context) {
     final totalPrice =
         (widget.salePrice == 0 ? widget.originalPrice : widget.salePrice) *
-        quantity;
+            quantity +
+        widget.shippingFee;
 
     return Container(
       color: Colors.white,
@@ -125,6 +128,14 @@ class _PurchaseBottomSheetState extends State<PurchaseBottomSheet> {
                             ? Colors
                                   .black // 할인 없으면 검정
                             : Colors.red, // 할인 있으면 빨강
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '배송비 ${numberFormat.format(widget.shippingFee)}원',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color.fromARGB(255, 0, 0, 0),
                       ),
                     ),
                   ],
