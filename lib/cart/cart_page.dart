@@ -87,6 +87,27 @@ class _CartPageState extends State<CartPage> {
     });
   }
 
+  // 선택된 상품 삭제
+  void _removeSelectedItems() {
+    final selectedCount = cartItems.where((item) => item.selected).length;
+    if (selectedCount == 0) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('삭제할 상품을 선택해주세요.'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      cartItems.removeWhere((item) => item.selected);
+    });
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  }
+
   @override
   Widget build(BuildContext context) {
     final isEmpty = cartItems.isEmpty;
@@ -103,6 +124,18 @@ class _CartPageState extends State<CartPage> {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         surfaceTintColor: Colors.white,
+        actions: [
+          if (!isEmpty)
+            TextButton(
+              onPressed: _removeSelectedItems,
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.black,
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 3),
+                visualDensity: VisualDensity.compact,
+              ),
+              child: Text('선택 상품 삭제'),
+            ),
+        ],
       ),
       body: isEmpty
           // 빈 장바구니 화면
