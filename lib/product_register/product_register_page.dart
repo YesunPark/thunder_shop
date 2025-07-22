@@ -314,7 +314,9 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
         builder: (context) => ProductDetailPage(
           product: dummyProduct,
           cartItems: [],
-          onAddToCart: (_) {},
+          onAddToCart: (Product product, int quantity) {
+            // 미리보기 모드이므로 실제 로직은 비워둡니다.
+          },
           isPreview: true,
         ),
       ),
