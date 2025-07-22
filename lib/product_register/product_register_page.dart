@@ -177,12 +177,7 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
       ).showSnackBar(const SnackBar(content: Text('대표 이미지를 등록해 주세요!')));
       return;
     }
-    if (_descImageUrl == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('상품설명 이미지를 등록해 주세요!')));
-      return;
-    }
+    // 상품 설명 이미지 필수 검증 제거 (descImageUrl)
     if (_selectedCategory == null || _selectedSubCategory == null) {
       ScaffoldMessenger.of(
         context,
@@ -195,14 +190,24 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
       ).showSnackBar(const SnackBar(content: Text('배송 정보를 입력해 주세요!')));
       return;
     }
+    if (_shippingFeeController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('배송비를 입력해주세요.')));
+      return;
+    }
     int price = int.tryParse(_priceController.text) ?? 0;
     int discountPrice = int.tryParse(_discountPriceController.text) ?? 0;
+    if (_discountPriceController.text.trim().isEmpty) {
+      discountPrice = price;
+    }
     if (discountPrice > price) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('할인가는 판매가보다 높을 수 없습니다!')));
       return;
     }
+
     int shippingFee = int.tryParse(_shippingFeeController.text) ?? 0;
 
     final product = Product(
@@ -221,17 +226,46 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
       isLiked: false,
     );
 
-    // 등록 완료 팝업 후 pop
     await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        content: const Text('상품 등록이 완료되었습니다.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
-          ),
-        ],
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 32,
+          horizontal: 24,
+        ), // 위아래 여유
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center, // 수직 중앙 정렬
+          children: [
+            const Text(
+              '상품 등록이 완료되었습니다.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 28), // 텍스트와 버튼 사이 공간
+            Center(
+              child: SizedBox(
+                width: 90,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        // actions 없앰 (Column에서 직접 배치)
       ),
     );
 
@@ -242,11 +276,12 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
   void _previewProduct() {
     if (_productNameController.text.trim().isEmpty ||
         _mainImageUrl == null ||
-        _descImageUrl == null ||
+        // 상품설명 이미지는 필수 항목에서 제거됨!
         _selectedCategory == null ||
         _selectedSubCategory == null ||
         _priceController.text.trim().isEmpty ||
-        _shippingInfoController.text.trim().isEmpty) {
+        _shippingInfoController.text.trim().isEmpty ||
+        _shippingFeeController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('미리보기를 위해 필수 항목(*)을 모두 입력해주세요!')),
       );
@@ -254,13 +289,16 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
     }
 
     final price = int.tryParse(_priceController.text) ?? 0;
-    final discountPrice = int.tryParse(_discountPriceController.text) ?? 0;
+    int discountPrice = int.tryParse(_discountPriceController.text) ?? 0;
+    if (_discountPriceController.text.trim().isEmpty) {
+      discountPrice = price;
+    }
     final shippingFee = int.tryParse(_shippingFeeController.text) ?? 0;
 
     final dummyProduct = Product(
       id: "preview_id", // 미리보기용 임시 ID
       productName: _productNameController.text.trim(),
-      descImageUrl: _descImageUrl!,
+      descImageUrl: _descImageUrl ?? '',
       category: _selectedCategory!,
       categoryDetail: _selectedSubCategory!,
       price: price,
@@ -270,7 +308,7 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
       videoUrl: _videoUrl,
       shippingInfo: _shippingInfoController.text.trim(),
       shippingFee: shippingFee,
-      isLiked: false, // 미리보기에서는 좋아요 상태는 중요하지 않으므로 false로 설정
+      isLiked: false,
     );
 
     Navigator.push(
@@ -280,7 +318,7 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
           product: dummyProduct,
           cartItems: [],
           onAddToCart: (_) {},
-          isPreview: true, // 미리보기 모드임을 전달
+          isPreview: true,
         ),
       ),
     );
@@ -297,6 +335,18 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
     _shippingFeeController.dispose();
     _shippingInfoController.dispose();
     super.dispose();
+  }
+
+  InputDecoration inputStyle(String hint, BorderRadius borderRadius) {
+    return InputDecoration(
+      hintText: hint,
+      border: OutlineInputBorder(borderRadius: borderRadius),
+      focusedBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: Colors.black),
+        borderRadius: borderRadius,
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    );
   }
 
   @override
@@ -316,7 +366,7 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFB3E5FC), // 연하늘색
         elevation: 0,
       ),
       body: SafeArea(
@@ -517,9 +567,9 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
                             ],
                           ),
                     const SizedBox(height: 24),
-                    // 상품 설명 이미지
+                    // 상품 설명 이미지 (필수 아님)
                     const Text(
-                      '상품 설명 이미지 *',
+                      '상품 설명 이미지',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
@@ -572,14 +622,7 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _productNameController,
-                      decoration: InputDecoration(
-                        hintText: '상품명을 입력해주세요.',
-                        border: OutlineInputBorder(borderRadius: borderRadius),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                      ),
+                      decoration: inputStyle('상품명을 입력해주세요.', borderRadius),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return '상품명을 입력해주세요.';
@@ -596,14 +639,9 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       value: _selectedCategory,
-                      decoration: InputDecoration(
-                        hintText: '카테고리를 선택하세요',
-                        border: OutlineInputBorder(borderRadius: borderRadius),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                      ),
+                      decoration: inputStyle('카테고리를 선택하세요', borderRadius),
+                      // 연하늘색 드롭다운 배경!
+                      dropdownColor: const Color.fromARGB(255, 230, 247, 255),
                       items: _categories.map((String category) {
                         return DropdownMenuItem<String>(
                           value: category,
@@ -626,14 +664,9 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       value: _selectedSubCategory,
-                      decoration: InputDecoration(
-                        hintText: '세부 카테고리를 선택하세요',
-                        border: OutlineInputBorder(borderRadius: borderRadius),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                      ),
+                      decoration: inputStyle('세부 카테고리를 선택하세요', borderRadius),
+                      // 연하늘색 드롭다운 배경!
+                      dropdownColor: const Color.fromARGB(255, 230, 247, 255),
                       items: _selectedCategory == null
                           ? []
                           : _subCategories[_selectedCategory!]!.map((
@@ -663,70 +696,95 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _priceController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        hintText: '판매가',
-                        border: OutlineInputBorder(borderRadius: borderRadius),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        // 판매가
+                        Expanded(
+                          child: TextFormField(
+                            controller: _priceController,
+                            keyboardType: TextInputType.number,
+                            decoration: inputStyle('판매가', borderRadius),
+                            validator: (value) {
+                              if (value == null ||
+                                  value.trim().isEmpty ||
+                                  int.tryParse(value) == null ||
+                                  int.parse(value) <= 0) {
+                                return '유효한 판매가를 입력해주세요.';
+                              }
+                              return null;
+                            },
+                          ),
                         ),
-                        suffixText: '원',
-                      ),
-                      validator: (value) {
-                        if (value == null ||
-                            value.trim().isEmpty ||
-                            int.tryParse(value) == null ||
-                            int.parse(value) <= 0) {
-                          return '유효한 판매가를 입력해주세요.';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _discountPriceController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        hintText: '할인가 (선택 사항)',
-                        border: OutlineInputBorder(borderRadius: borderRadius),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        suffix: (_discountPercent != null)
-                            ? Padding(
-                                padding: const EdgeInsets.only(left: 2),
-                                child: Text(
-                                  '${_discountPercent!.toStringAsFixed(0)}% 할인',
-                                  style: TextStyle(
-                                    color: Colors.red,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
+                        const SizedBox(width: 6),
+                        const Text('원', style: TextStyle(color: Colors.grey)),
+                        const SizedBox(width: 16),
+                        // 할인가 + %
+                        Expanded(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Expanded(
+                                child: TextFormField(
+                                  controller: _discountPriceController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: inputStyle(
+                                    '할인가 (선택 사항)',
+                                    borderRadius,
+                                  ),
+                                  validator: (value) {
+                                    if (value != null && value.isNotEmpty) {
+                                      if (int.tryParse(value) == null ||
+                                          int.parse(value) < 0) {
+                                        return '유효한 할인 가격을 입력해주세요.';
+                                      }
+                                      final originalPrice =
+                                          int.tryParse(_priceController.text) ??
+                                          0;
+                                      final discountPrice =
+                                          int.tryParse(value) ?? 0;
+                                      if (discountPrice >= originalPrice &&
+                                          originalPrice != 0) {
+                                        return '할인가는 판매가보다 작아야 합니다.';
+                                      }
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Text(
+                                '원',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                              if (_discountPercent != null) ...[
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red[50],
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    '-${_discountPercent!.toStringAsFixed(0)}%',
+                                    style: const TextStyle(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
                                   ),
                                 ),
-                              )
-                            : null,
-                      ),
-                      validator: (value) {
-                        if (value != null && value.isNotEmpty) {
-                          if (int.tryParse(value) == null ||
-                              int.parse(value) < 0) {
-                            return '유효한 할인 가격을 입력해주세요.';
-                          }
-                          if ((int.tryParse(value) ?? 0) >=
-                                  (int.tryParse(_priceController.text) ?? 0) &&
-                              (int.tryParse(_priceController.text) ?? 0) != 0) {
-                            return '할인가는 판매가보다 작아야 합니다.';
-                          }
-                        }
-                        return null;
-                      },
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 24),
-                    // 배송 정보
+                    // 배송 정보 (1줄 입력)
                     const Text(
                       '배송 정보 *',
                       style: TextStyle(fontWeight: FontWeight.bold),
@@ -734,15 +792,8 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _shippingInfoController,
-                      maxLines: 4,
-                      decoration: InputDecoration(
-                        hintText: '배송 정보를 입력해주세요.',
-                        border: OutlineInputBorder(borderRadius: borderRadius),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                      ),
+                      maxLines: 1, // 1줄
+                      decoration: inputStyle('배송 정보를 입력해주세요.', borderRadius),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return '배송 정보를 입력해주세요.';
@@ -753,28 +804,23 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
                     const SizedBox(height: 24),
                     // 배송비
                     const Text(
-                      '배송비',
+                      '배송비 *',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _shippingFeeController,
                       keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        hintText: '배송비를 입력해주세요 (무료 배송시 0)',
-                        border: OutlineInputBorder(borderRadius: borderRadius),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        suffixText: '원',
-                      ),
+                      decoration: inputStyle(
+                        '배송비를 입력해주세요 (무료 배송시 0 입력)',
+                        borderRadius,
+                      ).copyWith(suffixText: '원'),
                       validator: (value) {
-                        if (value != null && value.isNotEmpty) {
-                          if (int.tryParse(value) == null ||
-                              int.parse(value) < 0) {
-                            return '유효한 배송비를 입력해주세요.';
-                          }
+                        if (value == null ||
+                            value.trim().isEmpty ||
+                            int.tryParse(value) == null ||
+                            int.parse(value) < 0) {
+                          return '유효한 배송비를 입력해주세요.';
                         }
                         return null;
                       },
@@ -818,7 +864,10 @@ class _ProductRegisterPageState extends State<ProductRegisterPage> {
                   ),
                   child: const Text(
                     '등록하기',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ), // 흰색
                   ),
                 ),
               ),
