@@ -45,7 +45,7 @@ class ProductPriceInfo extends StatelessWidget {
               '${formatPrice(displaySalePrice)}원',
               style: TextStyle(
                 color: hasDiscount ? Colors.red : Colors.black,
-                fontWeight: hasDiscount ? FontWeight.bold : FontWeight.normal,
+                fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
             ),
