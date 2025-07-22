@@ -759,27 +759,32 @@ class _ProductListPageState extends State<ProductListPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         title: Stack(
-          alignment: Alignment.center,
           children: [
-            // 중앙에 Thunder 로고
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(Icons.fitness_center, color: Colors.teal),
-                SizedBox(width: 4),
-                Text(
-                  'Thunder',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black,
-                    fontFamily: 'SpaceMono',
+            // 중앙 정렬된 Thunder 로고
+            Align(
+              alignment: Alignment.center,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    'assets/logo_img.png',
+                    height: 30, // 필요 시 크기 조절
                   ),
-                ),
-              ],
+                  SizedBox(width: 4),
+                  Text(
+                    'Thunder',
+                    style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black,
+                      fontFamily: 'SpaceMono',
+                    ),
+                  ),
+                ],
+              ),
             ),
 
-            // 좌측 상품 등록 버튼 + 우측 장바구니
+            // 좌우 버튼
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -797,6 +802,7 @@ class _ProductListPageState extends State<ProductListPage> {
                     ),
                   ),
                   label: const Text('상품 등록', style: TextStyle(fontSize: 13)),
+                  icon: const Icon(Icons.add, size: 16),
                 ),
                 IconButton(
                   onPressed: goToCartPage,
