@@ -310,6 +310,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         ],
       ),
       bottomNavigationBar: BottomAppBar(
+        color: Colors.white,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Row(
